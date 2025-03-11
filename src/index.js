@@ -36,7 +36,15 @@ function RainbowKitThemeWrapper({ children }) {
           })
 
     return (
-        <RainbowKitProvider theme={rainbowTheme} key={key}>
+        <RainbowKitProvider
+            key={key}
+            theme={rainbowTheme}
+            coolMode
+            modalSize="compact"
+            showRecentTransactions={false}
+            disableConnectWallet={false}
+            includeWalletIds={["metaMask", "rabby"]}
+        >
             {children}
         </RainbowKitProvider>
     )
