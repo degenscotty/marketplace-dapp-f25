@@ -16,7 +16,7 @@ const NFTCard = ({ imageUrl, title, price, totalSupply, soldTokens, onClick }) =
         <div
             onClick={onClick}
             className={`rounded-xl overflow-hidden shadow-lg transition-transform hover:scale-105 cursor-pointer ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800"
+                isDarkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800"
             }`}
         >
             <img
@@ -40,7 +40,7 @@ const NFTCard = ({ imageUrl, title, price, totalSupply, soldTokens, onClick }) =
                         </span>
                     </div>
                     <div
-                        className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-700" : "bg-gray-200"}`}
+                        className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-200"}`}
                     >
                         <div
                             className="h-2 rounded-full bg-blue-500"

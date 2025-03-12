@@ -9,7 +9,7 @@ function App() {
 
     return (
         <NFTProvider>
-            <div className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-gray-100"}`}>
+            <div className={`min-h-screen ${isDarkMode ? "bg-gray-800" : "bg-gray-100"}`}>
                 <Navbar />
                 <NFTGrid />
             </div>

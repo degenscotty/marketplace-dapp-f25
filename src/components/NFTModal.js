@@ -27,7 +27,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
             {/* Modal content */}
             <div
                 className={`relative rounded-xl overflow-hidden shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto ${
-                    isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800"
+                    isDarkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800"
                 }`}
             >
                 {/* Close button */}
@@ -71,7 +71,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                 <div className="mb-2 font-medium">Quantity to purchase</div>
                                 <div className="relative">
                                     <div
-                                        className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-700" : "bg-gray-200"}`}
+                                        className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-200"}`}
                                     >
                                         {/* Sold tokens and quantity selector combined */}
                                         <div className="relative h-2">
@@ -155,7 +155,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                         onClick={() => onBuy(nft.id, quantity, totalPrice)}
                                         className={`w-full py-3 px-4 rounded-lg font-medium text-lg transition-colors ${
                                             isDarkMode
-                                                ? "bg-blue-500 hover:bg-blue-600 text-white"
+                                                ? "bg-gray-600 hover:bg-gray-500 text-white"
                                                 : "bg-blue-600 hover:bg-blue-700 text-white"
                                         }`}
                                     >
