@@ -19,7 +19,7 @@ function Navbar() {
                         href="/"
                         className={`${isDarkMode ? "text-white hover:text-gray-300" : "text-gray-800 hover:text-gray-600"} transition-colors`}
                     >
-                        DigiSpaces Demo
+                        Tokenization Demo
                     </a>
                 </div>
                 <div className="flex items-center space-x-4">
