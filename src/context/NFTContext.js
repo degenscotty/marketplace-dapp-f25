@@ -40,29 +40,28 @@ const buildingImages = [
     "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=300&h=300&fit=crop",
 ]
 
-export function NFTProvider({ children }) {
-    const [nfts] = useState(
-        Array(10)
-            .fill()
-            .map((_, index) => {
-                // Get a random location name, but make sure we don't exceed the array length
-                const randomLocationIndex = index % locationNames.length
-                // Get corresponding building image or use fallback
-                const imageUrl =
-                    index < buildingImages.length
-                        ? buildingImages[index]
-                        : `https://via.placeholder.com/300x300?text=Building+${index + 1}`
+// Generate initial NFT data outside the component
+const initialNFTs = Array(10)
+    .fill()
+    .map((_, index) => {
+        const randomLocationIndex = index % locationNames.length
+        const imageUrl =
+            index < buildingImages.length
+                ? buildingImages[index]
+                : `https://via.placeholder.com/300x300?text=Building+${index + 1}`
 
-                return {
-                    id: index + 1,
-                    imageUrl: imageUrl,
-                    title: locationNames[randomLocationIndex],
-                    price: `${(Math.random() * 2).toFixed(3)} ETH`,
-                    totalSupply: Math.floor(Math.random() * 1000) + 100,
-                    soldTokens: Math.floor(Math.random() * 1000) + 10,
-                }
-            }),
-    )
+        return {
+            id: index + 1,
+            imageUrl: imageUrl,
+            title: locationNames[randomLocationIndex],
+            price: `${(Math.random() * 2).toFixed(3)} ETH`,
+            totalSupply: Math.floor(Math.random() * 1000) + 100,
+            soldTokens: Math.floor(Math.random() * 1000) + 10,
+        }
+    })
+
+export function NFTProvider({ children }) {
+    const [nfts] = useState(initialNFTs)
 
     return <NFTContext.Provider value={{ nfts }}>{children}</NFTContext.Provider>
 }

@@ -1,10 +1,18 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useTheme } from "../context/ThemeContext"
 
 function NFTModal({ nft, isOpen, onClose, onBuy }) {
     const { isDarkMode } = useTheme()
-    const [quantity, setQuantity] = useState(1)
-    const maxAvailable = nft ? Math.min(10, nft.totalSupply - nft.soldTokens) : 0
+    const [quantity, setQuantity] = useState(0)
+
+    // Reset quantity when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setQuantity(0)
+        }
+    }, [isOpen])
+
+    const maxAvailable = nft ? Math.max(0, nft.totalSupply - nft.soldTokens) : 0
 
     // Calculate total price based on quantity
     const totalPrice = nft ? (parseFloat(nft.price) * quantity).toFixed(3) : 0
@@ -58,46 +66,84 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                 </span>
                             </div>
 
-                            {/* Progress bar */}
+                            {/* Progress bar with integrated quantity selector */}
                             <div className="mt-2 mb-6">
-                                <div
-                                    className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-700" : "bg-gray-200"}`}
-                                >
+                                <div className="mb-2 font-medium">Quantity to purchase</div>
+                                <div className="relative">
                                     <div
-                                        className="h-2 rounded-full bg-blue-500"
-                                        style={{
-                                            width: `${Math.min(100, (nft.soldTokens / nft.totalSupply) * 100)}%`,
-                                        }}
-                                    ></div>
-                                </div>
-                            </div>
-
-                            {maxAvailable > 0 ? (
-                                <>
-                                    {/* Quantity selector */}
-                                    <div className="mb-4">
-                                        <label className="block mb-2 font-medium">
-                                            Quantity to purchase
-                                        </label>
-                                        <div className="flex items-center">
+                                        className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-700" : "bg-gray-200"}`}
+                                    >
+                                        {/* Sold tokens and quantity selector combined */}
+                                        <div className="relative h-2">
+                                            {/* Sold tokens */}
+                                            <div
+                                                className="absolute left-0 h-2 rounded-l-full bg-blue-500"
+                                                style={{
+                                                    width:
+                                                        maxAvailable > 0
+                                                            ? `${Math.min(100, (nft.soldTokens / nft.totalSupply) * 100)}%`
+                                                            : "100%",
+                                                }}
+                                            ></div>
+                                            {/* Selected quantity */}
+                                            {maxAvailable > 0 && (
+                                                <div
+                                                    className="absolute h-2 bg-green-300"
+                                                    style={{
+                                                        left: `${Math.min(100, (nft.soldTokens / nft.totalSupply) * 100)}%`,
+                                                        width: `${Math.min(
+                                                            100 -
+                                                                (nft.soldTokens / nft.totalSupply) *
+                                                                    100,
+                                                            (quantity / nft.totalSupply) * 100,
+                                                        )}%`,
+                                                        borderRadius:
+                                                            quantity + nft.soldTokens >=
+                                                            nft.totalSupply
+                                                                ? "0 9999px 9999px 0"
+                                                                : "0",
+                                                    }}
+                                                ></div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {/* Range input with custom styling - only over available section */}
+                                    {maxAvailable > 0 && (
+                                        <div
+                                            className="absolute top-0 left-0 w-full h-2"
+                                            style={{
+                                                pointerEvents: "none",
+                                            }}
+                                        >
                                             <input
                                                 type="range"
-                                                min="1"
+                                                min="0"
                                                 max={maxAvailable}
                                                 value={quantity}
                                                 onChange={(e) =>
                                                     setQuantity(parseInt(e.target.value))
                                                 }
-                                                className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                                                className={`absolute top-1/2 -translate-y-1/2 h-4 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-blue-500 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-blue-500`}
+                                                style={{
+                                                    left: `${Math.min(100, (nft.soldTokens / nft.totalSupply) * 100)}%`,
+                                                    width: `${100 - Math.min(100, (nft.soldTokens / nft.totalSupply) * 100)}%`,
+                                                    pointerEvents: "auto",
+                                                }}
                                             />
                                         </div>
-                                        <div className="text-center mt-2">
-                                            <span className="px-2 py-1 rounded bg-blue-100 text-blue-800 font-medium">
-                                                {quantity} {quantity === 1 ? "token" : "tokens"}
-                                            </span>
-                                        </div>
+                                    )}
+                                </div>
+                                {maxAvailable > 0 && (
+                                    <div className="text-center mt-2">
+                                        <span className="px-2 py-1 rounded bg-blue-100 text-blue-800 font-medium">
+                                            {quantity} {quantity === 1 ? "token" : "tokens"}
+                                        </span>
                                     </div>
+                                )}
+                            </div>
 
+                            {maxAvailable > 0 ? (
+                                <>
                                     {/* Total */}
                                     <div className="flex justify-between text-lg font-bold mb-6">
                                         <span>Total:</span>
