@@ -12,7 +12,7 @@ import { config } from "./config/wagmi"
 
 // RainbowKit theme wrapper component
 function RainbowKitThemeWrapper({ children }) {
-    const { isDarkMode } = useTheme()
+    const { isDarkMode, colors } = useTheme()
     const [key, setKey] = React.useState(0)
 
     // Update key when theme changes to force re-render
@@ -23,13 +23,15 @@ function RainbowKitThemeWrapper({ children }) {
     // Create theme objects outside of JSX for better control
     const rainbowTheme = isDarkMode
         ? darkTheme({
-              accentColor: "#3b82f6",
+              accentColor: colors.accent,
+              accentColorForeground: "#000000",
               borderRadius: "medium",
               fontStack: "system",
               overlayBlur: "small",
           })
         : lightTheme({
-              accentColor: "#3b82f6",
+              accentColor: colors.accent,
+              accentColorForeground: "#FFFFFF",
               borderRadius: "medium",
               fontStack: "system",
               overlayBlur: "small",

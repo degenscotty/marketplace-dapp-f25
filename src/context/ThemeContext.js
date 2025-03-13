@@ -2,6 +2,29 @@ import React, { createContext, useContext, useState, useEffect } from "react"
 
 const ThemeContext = createContext()
 
+// Define theme colors based on the provided image
+const darkThemeColors = {
+    background: "#121212",
+    backgroundSecondary: "#1E1E1E",
+    text: "#FFFFFF",
+    textSecondary: "#AAAAAA",
+    accent: "#FFB800",
+    border: "#2A2A2A",
+    button: "#1E1E1E",
+    buttonHover: "#2A2A2A",
+}
+
+const lightThemeColors = {
+    background: "#F9FAFB",
+    backgroundSecondary: "#FFFFFF",
+    text: "#111827",
+    textSecondary: "#6B7280",
+    accent: "#3B82F6",
+    border: "#E5E7EB",
+    button: "#F3F4F6",
+    buttonHover: "#E5E7EB",
+}
+
 export function ThemeProvider({ children }) {
     // Check if dark mode is stored in localStorage or use system preference as fallback
     const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -24,8 +47,11 @@ export function ThemeProvider({ children }) {
         setIsDarkMode((prev) => !prev)
     }
 
+    // Get the current theme colors
+    const colors = isDarkMode ? darkThemeColors : lightThemeColors
+
     return (
-        <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+        <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode, colors }}>
             {children}
         </ThemeContext.Provider>
     )

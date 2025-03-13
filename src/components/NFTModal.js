@@ -2,20 +2,29 @@ import React, { useState, useEffect } from "react"
 import { useTheme } from "../context/ThemeContext"
 
 function NFTModal({ nft, isOpen, onClose, onBuy }) {
-    const { isDarkMode } = useTheme()
-    const [quantity, setQuantity] = useState(0)
+    const { colors } = useTheme()
+    const [quantity, setQuantity] = useState(1)
 
     // Reset quantity when modal opens
     useEffect(() => {
         if (isOpen) {
-            setQuantity(0)
+            setQuantity(1)
         }
     }, [isOpen])
 
-    const maxAvailable = nft ? Math.max(0, nft.totalSupply - nft.soldTokens) : 0
+    // Define the green color for sold out status
+    const greenColor = "#4ADE80"
 
-    // Calculate total price based on quantity
-    const totalPrice = nft ? (parseFloat(nft.price) * quantity).toFixed(3) : 0
+    const maxAvailable = nft ? Math.max(0, nft.totalSupply - nft.soldTokens) : 0
+    const soldPercentage = nft ? Math.min(100, (nft.soldTokens / nft.totalSupply) * 100) : 0
+    const availablePercentage = 100 - soldPercentage
+    const quantityPercentage = nft
+        ? Math.min(availablePercentage, (quantity / nft.totalSupply) * 100)
+        : 0
+
+    // Calculate total price as a number, only format for display
+    const totalPriceValue = nft ? parseFloat(nft.price) * quantity : 0
+    const totalPriceFormatted = totalPriceValue.toFixed(3)
 
     if (!isOpen || !nft) return null
 
@@ -26,19 +35,22 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
 
             {/* Modal content */}
             <div
-                className={`relative rounded-xl overflow-hidden shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto ${
-                    isDarkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800"
-                }`}
+                className="relative rounded-xl overflow-hidden shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto flex flex-col"
+                style={{
+                    backgroundColor: colors.backgroundSecondary,
+                    color: colors.text,
+                }}
             >
                 {/* Close button */}
                 <button
-                    className="absolute top-4 right-4 z-10 text-white bg-gray-800 bg-opacity-50 rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70"
+                    className="absolute top-4 right-4 z-10 text-white bg-gray-800 bg-opacity-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-opacity-70"
                     onClick={onClose}
                 >
                     ✕
                 </button>
 
-                <div className="flex flex-col md:flex-row">
+                {/* Main content area */}
+                <div className="flex-1 flex flex-col md:flex-row">
                     {/* Image section */}
                     <div className="md:w-1/2">
                         <img
@@ -49,54 +61,65 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                     </div>
 
                     {/* Info section */}
-                    <div className="p-6 md:w-1/2">
-                        <h2 className="text-2xl font-bold mb-4">{nft.title}</h2>
+                    <div className="p-5 pb-0 md:w-1/2">
+                        <h2 className="text-xl font-bold mb-3">{nft.title}</h2>
 
-                        <div className="mb-6">
+                        <div>
                             <div className="flex justify-between mb-2">
-                                <span className="font-medium">Price per token:</span>
-                                <span>{nft.price} ETH</span>
+                                <span className="text-sm font-medium">Price per token:</span>
+                                <span className="text-sm">{nft.price} ETH</span>
                             </div>
 
-                            <div className="flex justify-between mb-4">
-                                <span className="font-medium">Available:</span>
-                                <span>
+                            <div className="flex justify-between mb-3">
+                                <span className="text-sm font-medium">Available:</span>
+                                <span
+                                    className="text-sm"
+                                    style={{
+                                        color: soldPercentage === 100 ? greenColor : "inherit",
+                                    }}
+                                >
                                     {Math.max(0, nft.totalSupply - nft.soldTokens)} /{" "}
                                     {nft.totalSupply} tokens
+                                    {soldPercentage === 100 && " (Sold Out)"}
                                 </span>
                             </div>
 
                             {/* Progress bar with integrated quantity selector */}
-                            <div className="mt-2 mb-6">
-                                <div className="mb-2 font-medium">Quantity to purchase</div>
+                            <div className="mt-2 mb-5">
+                                <div className="mb-2 text-sm font-medium">Quantity to purchase</div>
                                 <div className="relative">
                                     <div
-                                        className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-200"}`}
+                                        className="w-full h-1.5 rounded-full"
+                                        style={{ backgroundColor: colors.border }}
                                     >
                                         {/* Sold tokens and quantity selector combined */}
-                                        <div className="relative h-2">
+                                        <div className="relative h-1.5">
                                             {/* Sold tokens */}
                                             <div
-                                                className="absolute left-0 h-2 rounded-l-full bg-blue-500"
+                                                className="absolute left-0 h-1.5 rounded-l-full"
                                                 style={{
+                                                    backgroundColor:
+                                                        maxAvailable <= 0
+                                                            ? greenColor
+                                                            : colors.accent,
+                                                    borderRadius:
+                                                        maxAvailable <= 0
+                                                            ? "9999px"
+                                                            : "9999px 0 0 9999px",
                                                     width:
                                                         maxAvailable > 0
-                                                            ? `${Math.min(100, (nft.soldTokens / nft.totalSupply) * 100)}%`
+                                                            ? `${soldPercentage}%`
                                                             : "100%",
                                                 }}
                                             ></div>
                                             {/* Selected quantity */}
                                             {maxAvailable > 0 && (
                                                 <div
-                                                    className="absolute h-2 bg-green-300"
+                                                    className="absolute h-1.5"
                                                     style={{
-                                                        left: `${Math.min(100, (nft.soldTokens / nft.totalSupply) * 100)}%`,
-                                                        width: `${Math.min(
-                                                            100 -
-                                                                (nft.soldTokens / nft.totalSupply) *
-                                                                    100,
-                                                            (quantity / nft.totalSupply) * 100,
-                                                        )}%`,
+                                                        backgroundColor: greenColor,
+                                                        left: `${soldPercentage}%`,
+                                                        width: `${quantityPercentage}%`,
                                                         borderRadius:
                                                             quantity + nft.soldTokens >=
                                                             nft.totalSupply
@@ -110,64 +133,213 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                     {/* Range input with custom styling - only over available section */}
                                     {maxAvailable > 0 && (
                                         <div
-                                            className="absolute top-0 left-0 w-full h-2"
-                                            style={{
-                                                pointerEvents: "none",
-                                            }}
+                                            className="absolute top-0 left-0 w-full h-1.5"
+                                            style={{ pointerEvents: "none" }}
                                         >
                                             <input
                                                 type="range"
-                                                min="0"
+                                                min="1"
                                                 max={maxAvailable}
                                                 value={quantity}
                                                 onChange={(e) =>
                                                     setQuantity(parseInt(e.target.value))
                                                 }
-                                                className={`absolute top-1/2 -translate-y-1/2 h-4 cursor-pointer appearance-none bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-800 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:border-0 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-2.5 [&::-moz-range-thumb]:h-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-gray-800 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0`}
+                                                className="absolute top-1/2 -translate-y-1/2 h-3 cursor-pointer appearance-none bg-transparent 
+                                                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 
+                                                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-400 [&::-webkit-slider-thumb]:shadow-md 
+                                                    [&::-webkit-slider-thumb]:border-0 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-2 
+                                                    [&::-moz-range-thumb]:h-2 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-gray-800 
+                                                    [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0"
                                                 style={{
-                                                    left: `${Math.min(100, (nft.soldTokens / nft.totalSupply) * 100)}%`,
-                                                    width: `${100 - Math.min(100, (nft.soldTokens / nft.totalSupply) * 100)}%`,
+                                                    left: `${soldPercentage - 1}%`,
+                                                    width: `${availablePercentage + 2}%`,
                                                     pointerEvents: "auto",
                                                 }}
+                                                aria-label="Select quantity of tokens to purchase"
                                             />
                                         </div>
                                     )}
                                 </div>
                                 {maxAvailable > 0 && (
                                     <div className="text-center mt-2">
-                                        <span className="px-2 py-1 rounded bg-blue-100 text-blue-800 font-medium">
+                                        <span
+                                            className="px-2 py-1 rounded text-xs font-medium"
+                                            style={{
+                                                backgroundColor: `${colors.accent}33`,
+                                                color: colors.accent,
+                                            }}
+                                        >
                                             {quantity} {quantity === 1 ? "token" : "tokens"}
                                         </span>
                                     </div>
                                 )}
                             </div>
 
-                            {maxAvailable > 0 ? (
-                                <>
-                                    {/* Total */}
-                                    <div className="flex justify-between text-lg font-bold mb-6">
-                                        <span>Total:</span>
-                                        <span>{totalPrice} ETH</span>
+                            {/* Investment Return Metrics Section */}
+                            <div
+                                className="mt-5 p-3 rounded-lg"
+                                style={{ backgroundColor: colors.background }}
+                            >
+                                <h3 className="text-sm font-semibold mb-3">
+                                    Investment Performance
+                                </h3>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    {/* APR */}
+                                    <div
+                                        className="p-2 rounded-md"
+                                        style={{
+                                            backgroundColor: colors.backgroundSecondary,
+                                            border: `1px solid ${colors.border}`,
+                                        }}
+                                    >
+                                        <div
+                                            className="text-xs"
+                                            style={{ color: colors.textSecondary }}
+                                        >
+                                            Annual APR
+                                        </div>
+                                        <div
+                                            className="text-lg font-bold"
+                                            style={{ color: colors.text }}
+                                        >
+                                            8.5%
+                                        </div>
                                     </div>
 
-                                    {/* Buy button */}
-                                    <button
-                                        onClick={() => onBuy(nft.id, quantity, totalPrice)}
-                                        className={`w-full py-3 px-4 rounded-lg font-medium text-lg transition-colors ${
-                                            isDarkMode
-                                                ? "bg-gray-600 hover:bg-gray-500 text-white"
-                                                : "bg-blue-600 hover:bg-blue-700 text-white"
-                                        }`}
+                                    {/* ROI */}
+                                    <div
+                                        className="p-2 rounded-md"
+                                        style={{
+                                            backgroundColor: colors.backgroundSecondary,
+                                            border: `1px solid ${colors.border}`,
+                                        }}
                                     >
-                                        Buy Now
-                                    </button>
-                                </>
-                            ) : (
-                                <div className="py-3 px-4 rounded-lg font-medium text-lg text-center bg-gray-200 text-gray-600">
-                                    Sold Out
+                                        <div
+                                            className="text-xs"
+                                            style={{ color: colors.textSecondary }}
+                                        >
+                                            Est. 5-Year ROI
+                                        </div>
+                                        <div
+                                            className="text-lg font-bold"
+                                            style={{ color: colors.text }}
+                                        >
+                                            42.5%
+                                        </div>
+                                    </div>
+
+                                    {/* Term */}
+                                    <div
+                                        className="p-2 rounded-md"
+                                        style={{
+                                            backgroundColor: colors.backgroundSecondary,
+                                            border: `1px solid ${colors.border}`,
+                                        }}
+                                    >
+                                        <div
+                                            className="text-xs"
+                                            style={{ color: colors.textSecondary }}
+                                        >
+                                            Lockup Period
+                                        </div>
+                                        <div
+                                            className="text-lg font-bold"
+                                            style={{ color: colors.text }}
+                                        >
+                                            1 Year
+                                        </div>
+                                    </div>
+
+                                    {/* Liquidity */}
+                                    <div
+                                        className="p-2 rounded-md"
+                                        style={{
+                                            backgroundColor: colors.backgroundSecondary,
+                                            border: `1px solid ${colors.border}`,
+                                        }}
+                                    >
+                                        <div
+                                            className="text-xs"
+                                            style={{ color: colors.textSecondary }}
+                                        >
+                                            Liquidity
+                                        </div>
+                                        <div
+                                            className="text-lg font-bold"
+                                            style={{ color: colors.text }}
+                                        >
+                                            Medium
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
+
+                                <div className="mt-3 text-xs">
+                                    <span
+                                        className="inline-block px-1.5 py-0.5 rounded mr-1"
+                                        style={{
+                                            backgroundColor: colors.button,
+                                            color: colors.textSecondary,
+                                        }}
+                                    >
+                                        Historical volatility: Low
+                                    </span>
+                                    <span
+                                        className="inline-block px-1.5 py-0.5 rounded"
+                                        style={{
+                                            backgroundColor: colors.button,
+                                            color: colors.textSecondary,
+                                        }}
+                                    >
+                                        Quarterly dividends
+                                    </span>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Sticky bottom section - no gap */}
+                <div
+                    className="w-full border-t"
+                    style={{
+                        backgroundColor: colors.backgroundSecondary,
+                        borderColor: colors.border,
+                    }}
+                >
+                    <div className="p-4">
+                        {maxAvailable > 0 ? (
+                            <div className="flex flex-col space-y-3">
+                                {/* Total */}
+                                <div className="flex justify-between text-base font-bold">
+                                    <span>Total:</span>
+                                    <span>{totalPriceFormatted} ETH</span>
+                                </div>
+
+                                {/* Buy button */}
+                                <button
+                                    onClick={() => onBuy(nft.id, quantity, totalPriceValue)}
+                                    className="w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors"
+                                    style={{
+                                        backgroundColor: colors.accent,
+                                        color: "#000000",
+                                    }}
+                                    disabled={quantity === 0}
+                                >
+                                    Buy Now
+                                </button>
+                            </div>
+                        ) : (
+                            <div
+                                className="py-2 px-4 rounded-lg font-medium text-sm text-center"
+                                style={{
+                                    backgroundColor: colors.button,
+                                    color: colors.textSecondary,
+                                }}
+                            >
+                                <span style={{ color: "#4ADE80" }}>Sold Out</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
