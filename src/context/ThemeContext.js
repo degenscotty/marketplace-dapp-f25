@@ -12,6 +12,8 @@ const darkThemeColors = {
     border: "#2A2A2A",
     button: "#1E1E1E",
     buttonHover: "#2A2A2A",
+    green: "#4ADE80",
+    red: "#FF4C4C",
 }
 
 const lightThemeColors = {
@@ -23,6 +25,8 @@ const lightThemeColors = {
     border: "#E5E7EB",
     button: "#F3F4F6",
     buttonHover: "#E5E7EB",
+    green: "#3B8A4D",
+    red: "#C72C2C",
 }
 
 export function ThemeProvider({ children }) {

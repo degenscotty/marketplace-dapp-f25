@@ -18,8 +18,9 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
         }
     }, [isOpen, nft])
 
+    // Use the green color from theme context instead of hardcoding
     // Define the green color for sold out status
-    const greenColor = "#4ADE80"
+    // const greenColor = "#4ADE80"
 
     if (!isOpen || !nft) return null
 
@@ -106,8 +107,8 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                             <div
                                 className="mb-4 py-1 px-3 rounded-full text-sm font-medium inline-block"
                                 style={{
-                                    backgroundColor: `${greenColor}20`,
-                                    color: greenColor,
+                                    backgroundColor: `${colors.green}20`,
+                                    color: colors.green,
                                 }}
                             >
                                 You own {nft.ownedQuantity} tokens
@@ -125,7 +126,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                 <span
                                     className="text-sm"
                                     style={{
-                                        color: soldPercentage === 100 ? greenColor : "inherit",
+                                        color: soldPercentage === 100 ? colors.green : "inherit",
                                     }}
                                 >
                                     {Math.max(0, nft.totalSupply - nft.soldTokens)} /{" "}
@@ -144,10 +145,10 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                         className={`py-2 px-4 font-medium text-sm ${activeTab === "sell" ? "border-b-2" : ""}`}
                                         style={{
                                             borderColor:
-                                                activeTab === "sell" ? greenColor : "transparent",
+                                                activeTab === "sell" ? colors.green : "transparent",
                                             color:
                                                 activeTab === "sell"
-                                                    ? greenColor
+                                                    ? colors.green
                                                     : colors.textSecondary,
                                         }}
                                         onClick={() => setActiveTab("sell")}
@@ -190,7 +191,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                                     style={{
                                                         backgroundColor:
                                                             maxAvailable <= 0
-                                                                ? greenColor
+                                                                ? colors.green
                                                                 : colors.accent,
                                                         borderRadius:
                                                             maxAvailable <= 0
@@ -207,7 +208,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                                     <div
                                                         className="absolute h-1.5"
                                                         style={{
-                                                            backgroundColor: greenColor,
+                                                            backgroundColor: colors.green,
                                                             left: `${soldPercentage}%`,
                                                             width: `${quantityPercentage}%`,
                                                             borderRadius:
@@ -235,15 +236,18 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                                         setQuantity(parseInt(e.target.value))
                                                     }
                                                     className="absolute top-1/2 -translate-y-1/2 h-3 cursor-pointer appearance-none bg-transparent 
-                                                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 
-                                                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-400 [&::-webkit-slider-thumb]:shadow-md 
-                                                        [&::-webkit-slider-thumb]:border-0 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-2 
-                                                        [&::-moz-range-thumb]:h-2 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-gray-800 
-                                                        [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0"
+                                                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
+                                                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md 
+                                                    [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-green-400
+                                                    [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-3 
+                                                    [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white 
+                                                    [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-green-400"
                                                     style={{
                                                         left: `${soldPercentage - 1}%`,
                                                         width: `${availablePercentage + 2}%`,
                                                         pointerEvents: "auto",
+                                                        zIndex: 10, // Ensure slider is above progress bar
+                                                        marginLeft: "0px", // Reset any margin that might affect position
                                                     }}
                                                     aria-label="Select quantity of tokens to purchase"
                                                 />
@@ -255,8 +259,8 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                             <span
                                                 className="px-2 py-1 rounded text-xs font-medium"
                                                 style={{
-                                                    backgroundColor: `${colors.accent}33`,
-                                                    color: colors.accent,
+                                                    backgroundColor: `${colors.green}33`,
+                                                    color: colors.green,
                                                 }}
                                             >
                                                 {quantity} {quantity === 1 ? "token" : "tokens"}
@@ -279,7 +283,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                             <div
                                                 className="absolute left-0 h-1.5 rounded-full"
                                                 style={{
-                                                    backgroundColor: greenColor,
+                                                    backgroundColor: colors.green,
                                                     width: `${sellQuantityPercentage}%`,
                                                     minWidth: sellQuantity > 0 ? "4px" : "0px",
                                                     borderRadius:
@@ -299,22 +303,32 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                         >
                                             <input
                                                 type="range"
-                                                min="1"
-                                                max={nft.ownedQuantity}
-                                                value={sellQuantity}
-                                                onChange={(e) =>
-                                                    setSellQuantity(parseInt(e.target.value))
-                                                }
+                                                min="0"
+                                                max="100"
+                                                value={sellQuantityPercentage}
+                                                onChange={(e) => {
+                                                    const percentage = parseInt(e.target.value)
+                                                    const newQuantity = Math.max(
+                                                        1,
+                                                        Math.round(
+                                                            (percentage / 100) * nft.ownedQuantity,
+                                                        ),
+                                                    )
+                                                    setSellQuantity(newQuantity)
+                                                }}
                                                 className="absolute top-1/2 -translate-y-1/2 h-3 cursor-pointer appearance-none bg-transparent 
-                                                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 
-                                                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-400 [&::-webkit-slider-thumb]:shadow-md 
-                                                    [&::-webkit-slider-thumb]:border-0 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-2 
-                                                    [&::-moz-range-thumb]:h-2 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-gray-800 
-                                                    [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0"
+                                                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
+                                                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md 
+                                                    [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-green-400
+                                                    [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-3 
+                                                    [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white 
+                                                    [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-green-400"
                                                 style={{
                                                     width: "100%",
                                                     pointerEvents: "auto",
-                                                    left: "0%",
+                                                    left: "0",
+                                                    marginLeft: "0px",
+                                                    zIndex: 10,
                                                 }}
                                                 aria-label="Select quantity of tokens to sell"
                                             />
@@ -324,8 +338,8 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                         <span
                                             className="px-2 py-1 rounded text-xs font-medium"
                                             style={{
-                                                backgroundColor: `${greenColor}20`,
-                                                color: greenColor,
+                                                backgroundColor: `${colors.green}20`,
+                                                color: colors.green,
                                             }}
                                         >
                                             {sellQuantity} {sellQuantity === 1 ? "token" : "tokens"}
@@ -482,7 +496,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                         onClick={handleBuy}
                                         className="w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors"
                                         style={{
-                                            backgroundColor: colors.accent,
+                                            backgroundColor: colors.green,
                                             color: "#000000",
                                         }}
                                         disabled={quantity === 0}
@@ -498,7 +512,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                         color: colors.textSecondary,
                                     }}
                                 >
-                                    <span style={{ color: "#4ADE80" }}>Sold Out</span>
+                                    <span style={{ color: colors.green }}>Sold Out</span>
                                 </div>
                             )
                         ) : (
@@ -516,7 +530,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                         onClick={handleSell}
                                         className="w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors"
                                         style={{
-                                            backgroundColor: greenColor,
+                                            backgroundColor: colors.red,
                                             color: "#000000",
                                         }}
                                         disabled={sellQuantity === 0}

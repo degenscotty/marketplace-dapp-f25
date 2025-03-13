@@ -101,7 +101,7 @@ const getRandomOwnedNFTs = (nfts) => {
 }
 
 export function NFTProvider({ children }) {
-    const [nfts] = useState(initialNFTs)
+    const [nfts, setNFTs] = useState(initialNFTs)
 
     // Initialize owned NFTs from localStorage or generate random ones if not found
     const [ownedNFTs, setOwnedNFTs] = useState(() => {
@@ -157,6 +157,15 @@ export function NFTProvider({ children }) {
                 })
             }
 
+            // Update the soldTokens count for this NFT
+            setNFTs((currentNFTs) =>
+                currentNFTs.map((nft) =>
+                    nft.id === id
+                        ? { ...nft, soldTokens: Math.max(0, nft.soldTokens - quantity) }
+                        : nft,
+                ),
+            )
+
             return true
         }
         return false
@@ -175,6 +184,14 @@ export function NFTProvider({ children }) {
         }
 
         setOwnedNFTs(newOwnedNFTs)
+
+        // Update the soldTokens count for this NFT
+        setNFTs((currentNFTs) =>
+            currentNFTs.map((nft) =>
+                nft.id === id ? { ...nft, soldTokens: nft.soldTokens + quantity } : nft,
+            ),
+        )
+
         return true
     }
 

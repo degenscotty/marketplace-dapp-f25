@@ -24,9 +24,6 @@ const NFTCard = ({
     // Display the actual tokens, but cap the displayed sold tokens to total supply for UI consistency
     const displaySoldTokens = Math.min(soldTokens, totalSupply)
 
-    // Define the green color for sold out status
-    const greenColor = "#4ADE80"
-
     const onImageError = () => {
         console.error(`Failed to load image: ${imageUrl}`)
         if (handleImageError) handleImageError(id)
@@ -61,7 +58,7 @@ const NFTCard = ({
                 <div className="mt-1 mb-2">
                     <div className="text-xs mb-1 flex justify-between">
                         <span>Sales Progress</span>
-                        <span style={{ color: percentageSold === 100 ? greenColor : "inherit" }}>
+                        <span style={{ color: percentageSold === 100 ? colors.green : "inherit" }}>
                             {displaySoldTokens} / {totalSupply} ({percentageSold.toFixed(0)}%)
                         </span>
                     </div>
@@ -73,7 +70,7 @@ const NFTCard = ({
                             className="h-1.5 rounded-full"
                             style={{
                                 backgroundColor:
-                                    percentageSold === 100 ? greenColor : colors.accent,
+                                    percentageSold === 100 ? colors.green : colors.accent,
                                 width: `${percentageSold}%`,
                             }}
                         ></div>
@@ -85,8 +82,8 @@ const NFTCard = ({
                     <div
                         className="mt-2 py-1 px-2 rounded-full text-xs font-medium text-center"
                         style={{
-                            backgroundColor: `${greenColor}20`,
-                            color: greenColor,
+                            backgroundColor: `${colors.green}20`,
+                            color: colors.green,
                         }}
                     >
                         You own {ownedQuantity} tokens
