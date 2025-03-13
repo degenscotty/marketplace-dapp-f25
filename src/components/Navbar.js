@@ -16,7 +16,7 @@ function Navbar() {
                 color: colors.text,
             }}
         >
-            <div className="container mx-auto px-12 flex justify-between items-center max-w-7xl">
+            <div className="container mx-4 w-full flex justify-between items-center max-w-full">
                 <div className="flex items-center space-x-4">
                     <div className="text-xl font-bold">
                         <Link
@@ -30,31 +30,29 @@ function Navbar() {
                     <Link
                         to="/portfolio"
                         style={{
-                            color: colors.text,
+                            color: colors.accent,
                         }}
                         className="text-sm font-medium px-3 py-2 rounded-md transition-colors hover:opacity-80"
                     >
                         My Portfolio
                     </Link>
                 </div>
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 ml-auto">
                     <div className="text-sm font-medium" style={{ color: colors.textSecondary }}>
                         Listed NFTs: {nfts.length}
                     </div>
                     <div className="scale-95 transform origin-right">
                         <ConnectButton
                             showBalance={false}
-                            className="p-2 rounded-md transition-colors"
+                            chainStatus="icon"
+                            accountStatus={{
+                                smallScreen: "avatar",
+                                largeScreen: "full",
+                            }}
+                            label="Connect Wallet"
                         />
                     </div>
-                    <button
-                        onClick={toggleDarkMode}
-                        className="p-2 text-sm rounded-lg transition-colors"
-                        style={{
-                            backgroundColor: colors.button,
-                            color: colors.text,
-                        }}
-                    >
+                    <button onClick={toggleDarkMode} className="p-2 text-sm">
                         {isDarkMode ? "🌞 Light Mode" : "🌙 Dark Mode"}
                     </button>
                 </div>

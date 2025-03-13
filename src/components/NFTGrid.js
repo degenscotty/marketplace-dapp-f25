@@ -3,8 +3,20 @@ import { useTheme } from "../context/ThemeContext"
 import { useNFTs } from "../context/NFTContext"
 import NFTModal from "./NFTModal"
 
-const NFTCard = ({ imageUrl, title, price, totalSupply, soldTokens, onClick }) => {
+const NFTCard = ({
+    imageUrl,
+    title,
+    price,
+    totalSupply,
+    soldTokens,
+    onClick,
+    id,
+    isOwned,
+    ownedQuantity,
+}) => {
     const { colors } = useTheme()
+    const { handleImageError } = useNFTs()
+    const [imgSrc, setImgSrc] = useState(imageUrl || "https://via.placeholder.com/300")
 
     // Calculate percentage sold for progress bar, capped at 100%
     const percentageSold = Math.min(100, (soldTokens / totalSupply) * 100)
@@ -14,6 +26,12 @@ const NFTCard = ({ imageUrl, title, price, totalSupply, soldTokens, onClick }) =
 
     // Define the green color for sold out status
     const greenColor = "#4ADE80"
+
+    const onImageError = () => {
+        console.error(`Failed to load image: ${imageUrl}`)
+        if (handleImageError) handleImageError(id)
+        setImgSrc("https://via.placeholder.com/300?text=Image+Not+Found")
+    }
 
     return (
         <div
@@ -25,9 +43,10 @@ const NFTCard = ({ imageUrl, title, price, totalSupply, soldTokens, onClick }) =
             }}
         >
             <img
-                src={imageUrl || "https://via.placeholder.com/300"}
+                src={imgSrc}
                 alt={title}
                 className="w-full h-64 object-cover"
+                onError={onImageError}
             />
             <div className="p-3">
                 <h3 className="text-base font-semibold mb-1">{title || "Untitled NFT"}</h3>
@@ -60,18 +79,40 @@ const NFTCard = ({ imageUrl, title, price, totalSupply, soldTokens, onClick }) =
                         ></div>
                     </div>
                 </div>
+
+                {/* Ownership badge for owned NFTs */}
+                {isOwned && (
+                    <div
+                        className="mt-2 py-1 px-2 rounded-full text-xs font-medium text-center"
+                        style={{
+                            backgroundColor: `${greenColor}20`,
+                            color: greenColor,
+                        }}
+                    >
+                        You own {ownedQuantity} tokens
+                    </div>
+                )}
             </div>
         </div>
     )
 }
 
 function NFTGrid() {
-    const { nfts } = useNFTs()
+    const { nfts, isNFTOwned, ownedNFTs } = useNFTs()
     const [selectedNFT, setSelectedNFT] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const { colors } = useTheme()
 
     const handleNFTClick = (nft) => {
-        setSelectedNFT(nft)
+        // Check if the NFT is owned and add ownership info to the selected NFT
+        const owned = isNFTOwned(nft.id)
+        const ownedQuantity = owned ? ownedNFTs[nft.id] : 0
+
+        setSelectedNFT({
+            ...nft,
+            isOwned: owned,
+            ownedQuantity,
+        })
         setIsModalOpen(true)
     }
 
@@ -88,20 +129,60 @@ function NFTGrid() {
         setIsModalOpen(false)
     }
 
+    // Get the list of owned NFTs
+    const ownedNFTIds = Object.keys(ownedNFTs).map((id) => parseInt(id))
+
     return (
-        <div className="w-full px-2 py-6 mt-12">
+        <div className="w-full px-4 py-6 mt-12">
+            {/* New section for My NFTs */}
+            <h2 className="text-xl font-bold mb-4" style={{ color: colors.text }}>
+                My Projects
+            </h2>
+            {ownedNFTIds.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3">
+                    {nfts
+                        .filter((nft) => ownedNFTIds.includes(nft.id))
+                        .map((nft) => (
+                            <NFTCard
+                                key={nft.id}
+                                id={nft.id}
+                                imageUrl={nft.imageUrl}
+                                title={nft.title}
+                                price={nft.price}
+                                totalSupply={nft.totalSupply}
+                                soldTokens={nft.soldTokens}
+                                isOwned={true}
+                                ownedQuantity={ownedNFTs[nft.id]}
+                                onClick={() => handleNFTClick(nft)}
+                            />
+                        ))}
+                </div>
+            ) : (
+                <div className="text-center py-8 text-gray-500">
+                    You don't own any NFTs yet. Browse below to get started!
+                </div>
+            )}
+
+            {/* New section for Other NFTs */}
+            <h2 className="text-xl font-bold mb-4 mt-8" style={{ color: colors.text }}>
+                Other Projects
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3">
-                {nfts.map((nft) => (
-                    <NFTCard
-                        key={nft.id}
-                        imageUrl={nft.imageUrl}
-                        title={nft.title}
-                        price={nft.price}
-                        totalSupply={nft.totalSupply}
-                        soldTokens={nft.soldTokens}
-                        onClick={() => handleNFTClick(nft)}
-                    />
-                ))}
+                {nfts
+                    .filter((nft) => !ownedNFTIds.includes(nft.id))
+                    .map((nft) => (
+                        <NFTCard
+                            key={nft.id}
+                            id={nft.id}
+                            imageUrl={nft.imageUrl}
+                            title={nft.title}
+                            price={nft.price}
+                            totalSupply={nft.totalSupply}
+                            soldTokens={nft.soldTokens}
+                            isOwned={false}
+                            onClick={() => handleNFTClick(nft)}
+                        />
+                    ))}
             </div>
 
             {/* NFT Detail Modal */}

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react"
+import React, { createContext, useContext, useState, useEffect } from "react"
 
 const NFTContext = createContext()
 
@@ -26,22 +26,32 @@ const locationNames = [
     "Miami Beach House",
 ]
 
-// Building images from stable sources
+// Replace the existing buildingImages array with an updated array of 20 image URLs
 const buildingImages = [
     "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=300&h=300&fit=crop",
     "https://images.unsplash.com/photo-1494145904049-0dca59b4bbad?w=300&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?w=300&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1577493340887-b7bfff550145?w=300&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1505409859467-3a796fd5798e?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=300&h=300&fit=crop",
     "https://images.unsplash.com/photo-1460317442991-0ec209397118?w=300&h=300&fit=crop",
     "https://images.unsplash.com/photo-1500916434205-0c77489c6cf7?w=300&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1495433324511-bf8e92934d90?w=300&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1565967511849-76a60a516170?w=300&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1448630360428-65456885c650?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1464146072230-91cabc968266?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1496564203457-11bb12075d90?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1451976426598-a7593bd6d0b2?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1494145904049-0dca59b4bbad?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1472224371017-08207f84aaae?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1481026469463-66327c86e544?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1503174971373-b1f69850bded?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1501084817091-a4f3d1d19e07?w=300&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1470723710355-95304d8aece4?w=300&h=300&fit=crop",
 ]
 
 // Generate initial NFT data outside the component
-const initialNFTs = Array(10)
+const initialNFTs = Array(20)
     .fill()
     .map((_, index) => {
         const randomLocationIndex = index % locationNames.length
@@ -60,10 +70,129 @@ const initialNFTs = Array(10)
         }
     })
 
+// Helper function to randomly select owned NFTs
+const getRandomOwnedNFTs = (nfts) => {
+    // Randomly decide how many NFTs to own (between 2-5)
+    const ownedCount = Math.floor(Math.random() * 4) + 2 // 2 to 5
+
+    // Create a copy of NFT IDs and shuffle them
+    const shuffledIds = [...nfts.map((nft) => nft.id)]
+    for (let i = shuffledIds.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        ;[shuffledIds[i], shuffledIds[j]] = [shuffledIds[j], shuffledIds[i]]
+    }
+
+    // Take the first 'ownedCount' NFTs from the shuffled array
+    const selectedIds = shuffledIds.slice(0, ownedCount)
+
+    // Create a map of owned NFTs with quantity owned for each
+    const ownedNFTsMap = {}
+    selectedIds.forEach((id) => {
+        // Randomly choose ownership quantity (10% to 50% of total supply)
+        const nft = nfts.find((n) => n.id === id)
+        const maxOwnable = Math.floor(nft.totalSupply * 0.5) // Max 50% of total supply
+        const minOwnable = Math.floor(nft.totalSupply * 0.1) // Min 10% of total supply
+        const ownedQuantity = Math.floor(Math.random() * (maxOwnable - minOwnable + 1)) + minOwnable
+
+        ownedNFTsMap[id] = ownedQuantity
+    })
+
+    return ownedNFTsMap
+}
+
 export function NFTProvider({ children }) {
     const [nfts] = useState(initialNFTs)
 
-    return <NFTContext.Provider value={{ nfts }}>{children}</NFTContext.Provider>
+    // Initialize owned NFTs from localStorage or generate random ones if not found
+    const [ownedNFTs, setOwnedNFTs] = useState(() => {
+        const savedOwnedNFTs = localStorage.getItem("ownedNFTs")
+        if (savedOwnedNFTs) {
+            return JSON.parse(savedOwnedNFTs)
+        }
+        return getRandomOwnedNFTs(initialNFTs)
+    })
+
+    // Save owned NFTs to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem("ownedNFTs", JSON.stringify(ownedNFTs))
+    }, [ownedNFTs])
+
+    // Add error handling for image loading
+    const handleImageError = (id) => {
+        console.error(`Failed to load image for NFT #${id}`)
+        // You could implement fallback logic here if needed
+    }
+
+    // Check if an NFT is owned
+    const isNFTOwned = (id) => {
+        return id in ownedNFTs
+    }
+
+    // Get list of owned NFT objects with ownership quantities
+    const getOwnedNFTsWithQuantities = () => {
+        return Object.entries(ownedNFTs).map(([id, quantity]) => {
+            const nft = nfts.find((n) => n.id === parseInt(id))
+            return {
+                ...nft,
+                ownedQuantity: quantity,
+            }
+        })
+    }
+
+    // Handle selling of NFTs
+    const sellNFT = (id, quantity) => {
+        if (id in ownedNFTs) {
+            const newQuantity = ownedNFTs[id] - quantity
+
+            if (newQuantity <= 0) {
+                // Remove the NFT if all tokens are sold
+                const newOwnedNFTs = { ...ownedNFTs }
+                delete newOwnedNFTs[id]
+                setOwnedNFTs(newOwnedNFTs)
+            } else {
+                // Update the owned quantity
+                setOwnedNFTs({
+                    ...ownedNFTs,
+                    [id]: newQuantity,
+                })
+            }
+
+            return true
+        }
+        return false
+    }
+
+    // Handle buying of NFTs
+    const buyNFT = (id, quantity) => {
+        const newOwnedNFTs = { ...ownedNFTs }
+
+        if (id in newOwnedNFTs) {
+            // Add to existing quantity
+            newOwnedNFTs[id] += quantity
+        } else {
+            // Add new NFT to owned NFTs
+            newOwnedNFTs[id] = quantity
+        }
+
+        setOwnedNFTs(newOwnedNFTs)
+        return true
+    }
+
+    return (
+        <NFTContext.Provider
+            value={{
+                nfts,
+                handleImageError,
+                ownedNFTs,
+                isNFTOwned,
+                getOwnedNFTsWithQuantities,
+                sellNFT,
+                buyNFT,
+            }}
+        >
+            {children}
+        </NFTContext.Provider>
+    )
 }
 
 export function useNFTs() {

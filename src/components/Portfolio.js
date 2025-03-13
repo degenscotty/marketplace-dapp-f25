@@ -14,12 +14,11 @@ import {
 } from "recharts"
 
 function Portfolio() {
-    const { nfts } = useNFTs()
-    const { isDarkMode } = useTheme()
+    const { getOwnedNFTsWithQuantities } = useNFTs()
+    const { colors } = useTheme()
 
-    // In a real app, this would filter for NFTs owned by the current user
-    // For demo purposes, we'll just show the first 3 NFTs as "owned"
-    const ownedNFTs = nfts.slice(0, 3)
+    // Use the owned NFTs from context instead of hardcoding first 3
+    const ownedNFTs = getOwnedNFTsWithQuantities()
 
     // Sample performance data for the chart
     // In a real application, this would come from an API
@@ -39,69 +38,69 @@ function Portfolio() {
     ]
 
     // Calculate total portfolio value
-    const totalPortfolioValue = ownedNFTs.reduce((sum, nft) => sum + parseFloat(nft.price), 0)
+    const totalPortfolioValue = ownedNFTs.reduce((sum, nft) => {
+        // Use the price multiplied by owned quantity
+        return sum + parseFloat(nft.price) * nft.ownedQuantity
+    }, 0)
+
+    // Define the green color for positive performance
+    const greenColor = "#10B981"
 
     return (
         <div className="container mx-auto px-4 pt-24 pb-8 max-w-7xl">
-            <h1
-                className={`text-3xl font-bold mb-6 ${isDarkMode ? "text-white" : "text-gray-800"}`}
-            >
+            <h1 className="text-3xl font-bold mb-6" style={{ color: colors.text }}>
                 My Portfolio
             </h1>
 
             {ownedNFTs.length === 0 ? (
-                <div
-                    className={`text-center py-10 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
-                >
+                <div className="text-center py-10" style={{ color: colors.textSecondary }}>
                     You don't own any NFTs yet. Browse the marketplace to get started!
                 </div>
             ) : (
                 <>
                     {/* Portfolio Performance Section */}
                     <div
-                        className={`mb-8 p-6 rounded-lg shadow-lg ${isDarkMode ? "bg-gray-700" : "bg-white"}`}
+                        className="mb-8 p-6 rounded-lg shadow-lg"
+                        style={{ backgroundColor: colors.backgroundSecondary }}
                     >
-                        <h2
-                            className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-800"}`}
-                        >
+                        <h2 className="text-2xl font-bold mb-4" style={{ color: colors.text }}>
                             Portfolio Performance
                         </h2>
 
                         {/* Summary Stats */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                             <div
-                                className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-800" : "bg-gray-100"}`}
+                                className="p-4 rounded-lg"
+                                style={{ backgroundColor: colors.background }}
                             >
-                                <p
-                                    className={`text-sm mb-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
-                                >
+                                <p className="text-sm mb-1" style={{ color: colors.textSecondary }}>
                                     Total Value
                                 </p>
-                                <p
-                                    className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}
-                                >
+                                <p className="text-2xl font-bold" style={{ color: colors.text }}>
                                     {totalPortfolioValue.toFixed(3)} ETH
                                 </p>
                             </div>
                             <div
-                                className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-800" : "bg-gray-100"}`}
+                                className="p-4 rounded-lg"
+                                style={{ backgroundColor: colors.background }}
                             >
-                                <p
-                                    className={`text-sm mb-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
-                                >
+                                <p className="text-sm mb-1" style={{ color: colors.textSecondary }}>
                                     Growth (YTD)
                                 </p>
-                                <p className={`text-2xl font-bold text-green-500`}>+37.5%</p>
+                                <p className="text-2xl font-bold" style={{ color: greenColor }}>
+                                    +37.5%
+                                </p>
                             </div>
                             <div
-                                className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-800" : "bg-gray-100"}`}
+                                className="p-4 rounded-lg"
+                                style={{ backgroundColor: colors.background }}
                             >
-                                <p
-                                    className={`text-sm mb-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
-                                >
+                                <p className="text-sm mb-1" style={{ color: colors.textSecondary }}>
                                     Avg. Daily Return
                                 </p>
-                                <p className={`text-2xl font-bold text-green-500`}>+0.12%</p>
+                                <p className="text-2xl font-bold" style={{ color: greenColor }}>
+                                    +0.12%
+                                </p>
                             </div>
                         </div>
 
@@ -116,12 +115,12 @@ function Portfolio() {
                                         <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                                             <stop
                                                 offset="5%"
-                                                stopColor="#10B981"
+                                                stopColor={greenColor}
                                                 stopOpacity={0.8}
                                             />
                                             <stop
                                                 offset="95%"
-                                                stopColor="#10B981"
+                                                stopColor={greenColor}
                                                 stopOpacity={0.1}
                                             />
                                         </linearGradient>
@@ -130,30 +129,30 @@ function Portfolio() {
                                         dataKey="month"
                                         tickLine={false}
                                         axisLine={false}
-                                        tick={{ fill: isDarkMode ? "#9CA3AF" : "#6B7280" }}
+                                        tick={{ fill: colors.textSecondary }}
                                     />
                                     <YAxis
                                         domain={["dataMin - 0.5", "dataMax + 0.5"]}
                                         tickLine={false}
                                         axisLine={false}
-                                        tick={{ fill: isDarkMode ? "#9CA3AF" : "#6B7280" }}
+                                        tick={{ fill: colors.textSecondary }}
                                     />
                                     <CartesianGrid
                                         strokeDasharray="3 3"
                                         vertical={false}
-                                        stroke={isDarkMode ? "#4B5563" : "#E5E7EB"}
+                                        stroke={colors.border}
                                     />
                                     <Tooltip
                                         contentStyle={{
-                                            backgroundColor: isDarkMode ? "#1F2937" : "#FFFFFF",
-                                            borderColor: isDarkMode ? "#374151" : "#E5E7EB",
-                                            color: isDarkMode ? "#F9FAFB" : "#111827",
+                                            backgroundColor: colors.backgroundSecondary,
+                                            borderColor: colors.border,
+                                            color: colors.text,
                                         }}
                                     />
                                     <Area
                                         type="monotone"
                                         dataKey="value"
-                                        stroke="#10B981"
+                                        stroke={greenColor}
                                         fillOpacity={1}
                                         fill="url(#colorValue)"
                                     />
@@ -163,10 +162,12 @@ function Portfolio() {
 
                         {/* Investment Performance Metrics */}
                         <div
-                            className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-800" : "bg-gray-100"}`}
+                            className="p-4 rounded-lg"
+                            style={{ backgroundColor: colors.background }}
                         >
                             <h3
-                                className={`text-sm font-semibold mb-3 ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                                className="text-sm font-semibold mb-3"
+                                style={{ color: colors.text }}
                             >
                                 Investment Performance
                             </h3>
@@ -174,15 +175,21 @@ function Portfolio() {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 {/* APR */}
                                 <div
-                                    className={`p-2 rounded-md ${isDarkMode ? "bg-gray-700" : "bg-white border border-gray-200"}`}
+                                    className="p-2 rounded-md"
+                                    style={{
+                                        backgroundColor: colors.backgroundSecondary,
+                                        border: `1px solid ${colors.border}`,
+                                    }}
                                 >
                                     <div
-                                        className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+                                        className="text-xs"
+                                        style={{ color: colors.textSecondary }}
                                     >
                                         Annual APR
                                     </div>
                                     <div
-                                        className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                                        className="text-lg font-bold"
+                                        style={{ color: colors.text }}
                                     >
                                         8.5%
                                     </div>
@@ -190,15 +197,21 @@ function Portfolio() {
 
                                 {/* ROI */}
                                 <div
-                                    className={`p-2 rounded-md ${isDarkMode ? "bg-gray-700" : "bg-white border border-gray-200"}`}
+                                    className="p-2 rounded-md"
+                                    style={{
+                                        backgroundColor: colors.backgroundSecondary,
+                                        border: `1px solid ${colors.border}`,
+                                    }}
                                 >
                                     <div
-                                        className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+                                        className="text-xs"
+                                        style={{ color: colors.textSecondary }}
                                     >
                                         Est. 5-Year ROI
                                     </div>
                                     <div
-                                        className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                                        className="text-lg font-bold"
+                                        style={{ color: colors.text }}
                                     >
                                         42.5%
                                     </div>
@@ -206,15 +219,21 @@ function Portfolio() {
 
                                 {/* Term */}
                                 <div
-                                    className={`p-2 rounded-md ${isDarkMode ? "bg-gray-700" : "bg-white border border-gray-200"}`}
+                                    className="p-2 rounded-md"
+                                    style={{
+                                        backgroundColor: colors.backgroundSecondary,
+                                        border: `1px solid ${colors.border}`,
+                                    }}
                                 >
                                     <div
-                                        className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+                                        className="text-xs"
+                                        style={{ color: colors.textSecondary }}
                                     >
                                         Avg. Lockup Period
                                     </div>
                                     <div
-                                        className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                                        className="text-lg font-bold"
+                                        style={{ color: colors.text }}
                                     >
                                         1 Year
                                     </div>
@@ -222,15 +241,21 @@ function Portfolio() {
 
                                 {/* Liquidity */}
                                 <div
-                                    className={`p-2 rounded-md ${isDarkMode ? "bg-gray-700" : "bg-white border border-gray-200"}`}
+                                    className="p-2 rounded-md"
+                                    style={{
+                                        backgroundColor: colors.backgroundSecondary,
+                                        border: `1px solid ${colors.border}`,
+                                    }}
                                 >
                                     <div
-                                        className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+                                        className="text-xs"
+                                        style={{ color: colors.textSecondary }}
                                     >
                                         Portfolio Liquidity
                                     </div>
                                     <div
-                                        className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                                        className="text-lg font-bold"
+                                        style={{ color: colors.text }}
                                     >
                                         Medium
                                     </div>
@@ -239,12 +264,20 @@ function Portfolio() {
 
                             <div className="mt-3 text-xs">
                                 <span
-                                    className={`inline-block px-1.5 py-0.5 rounded mr-1 ${isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-600"}`}
+                                    className="inline-block px-1.5 py-0.5 rounded mr-1"
+                                    style={{
+                                        backgroundColor: colors.button,
+                                        color: colors.textSecondary,
+                                    }}
                                 >
                                     Historical volatility: Low
                                 </span>
                                 <span
-                                    className={`inline-block px-1.5 py-0.5 rounded ${isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-600"}`}
+                                    className="inline-block px-1.5 py-0.5 rounded"
+                                    style={{
+                                        backgroundColor: colors.button,
+                                        color: colors.textSecondary,
+                                    }}
                                 >
                                     Quarterly dividends
                                 </span>
@@ -253,18 +286,15 @@ function Portfolio() {
                     </div>
 
                     {/* NFT Grid */}
-                    <h2
-                        className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-800"}`}
-                    >
-                        My NFTs
+                    <h2 className="text-2xl font-bold mb-4" style={{ color: colors.text }}>
+                        My Projects
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {ownedNFTs.map((nft) => (
                             <div
                                 key={nft.id}
-                                className={`rounded-lg overflow-hidden shadow-lg transition-transform hover:scale-[1.02] ${
-                                    isDarkMode ? "bg-gray-700" : "bg-white"
-                                }`}
+                                className="rounded-lg overflow-hidden shadow-lg transition-transform hover:scale-[1.02]"
+                                style={{ backgroundColor: colors.backgroundSecondary }}
                             >
                                 <img
                                     src={nft.imageUrl}
@@ -273,15 +303,20 @@ function Portfolio() {
                                 />
                                 <div className="p-4">
                                     <h3
-                                        className={`text-xl font-semibold mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                                        className="text-xl font-semibold mb-2"
+                                        style={{ color: colors.text }}
                                     >
                                         {nft.title}
                                     </h3>
-                                    <div
-                                        className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
-                                    >
+                                    <div style={{ color: colors.textSecondary }}>
                                         <p className="mb-1">Value: {nft.price}</p>
-                                        <p>Ownership: {Math.floor(Math.random() * 20) + 10}%</p>
+                                        <p>
+                                            Owned Tokens: {nft.ownedQuantity} (
+                                            {((nft.ownedQuantity / nft.totalSupply) * 100).toFixed(
+                                                1,
+                                            )}
+                                            %)
+                                        </p>
                                     </div>
                                 </div>
                             </div>

@@ -1,3 +1,48 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* RainbowKit custom styles to better match the ThemeContext */
+:root {
+    --rk-fonts-body:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --rk-radii-actionButton: 8px;
+    --rk-radii-connectButton: 8px;
+    --rk-radii-menuButton: 8px;
+    --rk-radii-modal: 12px;
+    --rk-radii-modalMobile: 12px;
+}
+
+/* Target RainbowKit elements specifically */
+[data-rk] button {
+    font-family: var(--rk-fonts-body);
+    transition: all 0.2s ease-in-out;
+}
+
+/* Force AccountModal elements to have correct styling */
+[data-rk] .rk-account-modal * {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Ensure menu items have proper styling */
+[data-rk] .rk-menu-item {
+    border-radius: var(--rk-radii-menuButton);
+    transition: all 0.2s ease-in-out;
+}
+
+/* Profile dropdown menu */
+[data-rk] .rk-account-button {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Fix any remaining wallet connection UI issues */
+[data-rk] .rk-wallet-option {
+    border-radius: var(--rk-radii-menuButton);
+    transition: all 0.2s ease-in-out;
+}
+
+/* Modal backdrop should have blur */
+[data-rk] .rk-modal-backdrop {
+    backdrop-filter: blur(4px);
+}

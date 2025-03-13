@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from "react"
 import { useTheme } from "../context/ThemeContext"
+import { useNFTs } from "../context/NFTContext"
 
 function NFTModal({ nft, isOpen, onClose, onBuy }) {
     const { colors } = useTheme()
+    const { buyNFT, sellNFT } = useNFTs()
     const [quantity, setQuantity] = useState(1)
+    const [sellQuantity, setSellQuantity] = useState(1)
+    const [activeTab, setActiveTab] = useState("buy") // 'buy' or 'sell'
 
-    // Reset quantity when modal opens
+    // Reset quantities and set default tab when modal opens
     useEffect(() => {
         if (isOpen) {
             setQuantity(1)
+            setSellQuantity(nft && nft.isOwned ? Math.min(nft.ownedQuantity, 1) : 0)
+            setActiveTab(nft && nft.isOwned ? "sell" : "buy")
         }
-    }, [isOpen])
+    }, [isOpen, nft])
 
     // Define the green color for sold out status
     const greenColor = "#4ADE80"
+
+    if (!isOpen || !nft) return null
 
     const maxAvailable = nft ? Math.max(0, nft.totalSupply - nft.soldTokens) : 0
     const soldPercentage = nft ? Math.min(100, (nft.soldTokens / nft.totalSupply) * 100) : 0
@@ -26,7 +34,32 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
     const totalPriceValue = nft ? parseFloat(nft.price) * quantity : 0
     const totalPriceFormatted = totalPriceValue.toFixed(3)
 
-    if (!isOpen || !nft) return null
+    // Calculate total sell value
+    const totalSellValue = nft ? parseFloat(nft.price) * sellQuantity : 0
+    const totalSellFormatted = totalSellValue.toFixed(3)
+
+    // Calculate sell quantity percentage (for the progress bar)
+    const sellQuantityPercentage =
+        nft && nft.ownedQuantity ? (sellQuantity / nft.ownedQuantity) * 100 : 0
+
+    // Handle buy action
+    const handleBuy = () => {
+        if (onBuy) {
+            onBuy(nft.id, quantity, totalPriceFormatted)
+            // Also update context
+            buyNFT(nft.id, quantity)
+        }
+    }
+
+    // Handle sell action
+    const handleSell = () => {
+        if (sellNFT(nft.id, sellQuantity)) {
+            alert(
+                `Successfully sold ${sellQuantity} tokens of "${nft.title}" for ${totalSellFormatted} ETH`,
+            )
+            onClose()
+        }
+    }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -43,7 +76,11 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
             >
                 {/* Close button */}
                 <button
-                    className="absolute top-4 right-4 z-10 text-white bg-gray-800 bg-opacity-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-opacity-70"
+                    className="absolute top-4 right-4 z-10 rounded-full w-7 h-7 flex items-center justify-center hover:bg-opacity-70"
+                    style={{
+                        backgroundColor: colors.button,
+                        color: colors.text,
+                    }}
                     onClick={onClose}
                 >
                     ✕
@@ -56,13 +93,26 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                         <img
                             src={nft.imageUrl}
                             alt={nft.title}
-                            className="w-full h-auto object-cover"
+                            className="w-full h-full object-cover"
                         />
                     </div>
 
                     {/* Info section */}
                     <div className="p-5 pb-0 md:w-1/2">
                         <h2 className="text-xl font-bold mb-3">{nft.title}</h2>
+
+                        {/* Ownership badge for owned NFTs */}
+                        {nft.isOwned && (
+                            <div
+                                className="mb-4 py-1 px-3 rounded-full text-sm font-medium inline-block"
+                                style={{
+                                    backgroundColor: `${greenColor}20`,
+                                    color: greenColor,
+                                }}
+                            >
+                                You own {nft.ownedQuantity} tokens
+                            </div>
+                        )}
 
                         <div>
                             <div className="flex justify-between mb-2">
@@ -84,54 +134,165 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                 </span>
                             </div>
 
-                            {/* Progress bar with integrated quantity selector */}
-                            <div className="mt-2 mb-5">
-                                <div className="mb-2 text-sm font-medium">Quantity to purchase</div>
-                                <div className="relative">
-                                    <div
-                                        className="w-full h-1.5 rounded-full"
-                                        style={{ backgroundColor: colors.border }}
+                            {/* Buy/Sell Tabs - only show if owned */}
+                            {nft.isOwned && (
+                                <div
+                                    className="flex border-b mb-4"
+                                    style={{ borderColor: colors.border }}
+                                >
+                                    <button
+                                        className={`py-2 px-4 font-medium text-sm ${activeTab === "sell" ? "border-b-2" : ""}`}
+                                        style={{
+                                            borderColor:
+                                                activeTab === "sell" ? greenColor : "transparent",
+                                            color:
+                                                activeTab === "sell"
+                                                    ? greenColor
+                                                    : colors.textSecondary,
+                                        }}
+                                        onClick={() => setActiveTab("sell")}
                                     >
-                                        {/* Sold tokens and quantity selector combined */}
-                                        <div className="relative h-1.5">
-                                            {/* Sold tokens */}
-                                            <div
-                                                className="absolute left-0 h-1.5 rounded-l-full"
-                                                style={{
-                                                    backgroundColor:
-                                                        maxAvailable <= 0
-                                                            ? greenColor
-                                                            : colors.accent,
-                                                    borderRadius:
-                                                        maxAvailable <= 0
-                                                            ? "9999px"
-                                                            : "9999px 0 0 9999px",
-                                                    width:
-                                                        maxAvailable > 0
-                                                            ? `${soldPercentage}%`
-                                                            : "100%",
-                                                }}
-                                            ></div>
-                                            {/* Selected quantity */}
-                                            {maxAvailable > 0 && (
+                                        Sell
+                                    </button>
+                                    <button
+                                        className={`py-2 px-4 font-medium text-sm ${activeTab === "buy" ? "border-b-2" : ""}`}
+                                        style={{
+                                            borderColor:
+                                                activeTab === "buy" ? colors.accent : "transparent",
+                                            color:
+                                                activeTab === "buy"
+                                                    ? colors.accent
+                                                    : colors.textSecondary,
+                                        }}
+                                        onClick={() => setActiveTab("buy")}
+                                    >
+                                        Buy More
+                                    </button>
+                                </div>
+                            )}
+
+                            {activeTab === "buy" && (
+                                /* Progress bar with integrated quantity selector for buying */
+                                <div className="mt-2 mb-5">
+                                    <div className="mb-2 text-sm font-medium">
+                                        Quantity to purchase
+                                    </div>
+                                    <div className="relative">
+                                        <div
+                                            className="w-full h-1.5 rounded-full"
+                                            style={{ backgroundColor: colors.border }}
+                                        >
+                                            {/* Sold tokens and quantity selector combined */}
+                                            <div className="relative h-1.5">
+                                                {/* Sold tokens */}
                                                 <div
-                                                    className="absolute h-1.5"
+                                                    className="absolute left-0 h-1.5 rounded-l-full"
                                                     style={{
-                                                        backgroundColor: greenColor,
-                                                        left: `${soldPercentage}%`,
-                                                        width: `${quantityPercentage}%`,
+                                                        backgroundColor:
+                                                            maxAvailable <= 0
+                                                                ? greenColor
+                                                                : colors.accent,
                                                         borderRadius:
-                                                            quantity + nft.soldTokens >=
-                                                            nft.totalSupply
-                                                                ? "0 9999px 9999px 0"
-                                                                : "0",
+                                                            maxAvailable <= 0
+                                                                ? "9999px"
+                                                                : "9999px 0 0 9999px",
+                                                        width:
+                                                            maxAvailable > 0
+                                                                ? `${soldPercentage}%`
+                                                                : "100%",
                                                     }}
                                                 ></div>
-                                            )}
+                                                {/* Selected quantity */}
+                                                {maxAvailable > 0 && (
+                                                    <div
+                                                        className="absolute h-1.5"
+                                                        style={{
+                                                            backgroundColor: greenColor,
+                                                            left: `${soldPercentage}%`,
+                                                            width: `${quantityPercentage}%`,
+                                                            borderRadius:
+                                                                quantity + nft.soldTokens >=
+                                                                nft.totalSupply
+                                                                    ? "0 9999px 9999px 0"
+                                                                    : "0",
+                                                        }}
+                                                    ></div>
+                                                )}
+                                            </div>
                                         </div>
+                                        {/* Range input with custom styling - only over available section */}
+                                        {maxAvailable > 0 && (
+                                            <div
+                                                className="absolute top-0 left-0 w-full h-1.5"
+                                                style={{ pointerEvents: "none" }}
+                                            >
+                                                <input
+                                                    type="range"
+                                                    min="1"
+                                                    max={maxAvailable}
+                                                    value={quantity}
+                                                    onChange={(e) =>
+                                                        setQuantity(parseInt(e.target.value))
+                                                    }
+                                                    className="absolute top-1/2 -translate-y-1/2 h-3 cursor-pointer appearance-none bg-transparent 
+                                                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 
+                                                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-400 [&::-webkit-slider-thumb]:shadow-md 
+                                                        [&::-webkit-slider-thumb]:border-0 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-2 
+                                                        [&::-moz-range-thumb]:h-2 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-gray-800 
+                                                        [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0"
+                                                    style={{
+                                                        left: `${soldPercentage - 1}%`,
+                                                        width: `${availablePercentage + 2}%`,
+                                                        pointerEvents: "auto",
+                                                    }}
+                                                    aria-label="Select quantity of tokens to purchase"
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                    {/* Range input with custom styling - only over available section */}
                                     {maxAvailable > 0 && (
+                                        <div className="text-center mt-2">
+                                            <span
+                                                className="px-2 py-1 rounded text-xs font-medium"
+                                                style={{
+                                                    backgroundColor: `${colors.accent}33`,
+                                                    color: colors.accent,
+                                                }}
+                                            >
+                                                {quantity} {quantity === 1 ? "token" : "tokens"}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === "sell" && nft.isOwned && (
+                                /* Sell quantity selector */
+                                <div className="mt-2 mb-5">
+                                    <div className="mb-2 text-sm font-medium">Quantity to sell</div>
+                                    <div className="relative">
+                                        <div
+                                            className="w-full h-1.5 rounded-full"
+                                            style={{ backgroundColor: colors.border }}
+                                        >
+                                            {/* Selected sell quantity */}
+                                            <div
+                                                className="absolute left-0 h-1.5 rounded-full"
+                                                style={{
+                                                    backgroundColor: greenColor,
+                                                    width: `${sellQuantityPercentage}%`,
+                                                    minWidth: sellQuantity > 0 ? "4px" : "0px",
+                                                    borderRadius:
+                                                        sellQuantity === 0
+                                                            ? "9999px"
+                                                            : sellQuantity === nft.ownedQuantity
+                                                              ? "9999px"
+                                                              : "9999px 0 0 9999px",
+                                                }}
+                                            ></div>
+                                        </div>
+
+                                        {/* Range input for sell quantity */}
                                         <div
                                             className="absolute top-0 left-0 w-full h-1.5"
                                             style={{ pointerEvents: "none" }}
@@ -139,10 +300,10 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                             <input
                                                 type="range"
                                                 min="1"
-                                                max={maxAvailable}
-                                                value={quantity}
+                                                max={nft.ownedQuantity}
+                                                value={sellQuantity}
                                                 onChange={(e) =>
-                                                    setQuantity(parseInt(e.target.value))
+                                                    setSellQuantity(parseInt(e.target.value))
                                                 }
                                                 className="absolute top-1/2 -translate-y-1/2 h-3 cursor-pointer appearance-none bg-transparent 
                                                     [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 
@@ -151,29 +312,27 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                                     [&::-moz-range-thumb]:h-2 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-gray-800 
                                                     [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-0"
                                                 style={{
-                                                    left: `${soldPercentage - 1}%`,
-                                                    width: `${availablePercentage + 2}%`,
+                                                    width: "100%",
                                                     pointerEvents: "auto",
+                                                    left: "0%",
                                                 }}
-                                                aria-label="Select quantity of tokens to purchase"
+                                                aria-label="Select quantity of tokens to sell"
                                             />
                                         </div>
-                                    )}
-                                </div>
-                                {maxAvailable > 0 && (
+                                    </div>
                                     <div className="text-center mt-2">
                                         <span
                                             className="px-2 py-1 rounded text-xs font-medium"
                                             style={{
-                                                backgroundColor: `${colors.accent}33`,
-                                                color: colors.accent,
+                                                backgroundColor: `${greenColor}20`,
+                                                color: greenColor,
                                             }}
                                         >
-                                            {quantity} {quantity === 1 ? "token" : "tokens"}
+                                            {sellQuantity} {sellQuantity === 1 ? "token" : "tokens"}
                                         </span>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
 
                             {/* Investment Return Metrics Section */}
                             <div
@@ -308,37 +467,64 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                     }}
                 >
                     <div className="p-4">
-                        {maxAvailable > 0 ? (
-                            <div className="flex flex-col space-y-3">
-                                {/* Total */}
-                                <div className="flex justify-between text-base font-bold">
-                                    <span>Total:</span>
-                                    <span>{totalPriceFormatted} ETH</span>
-                                </div>
+                        {activeTab === "buy" ? (
+                            // Buy section
+                            maxAvailable > 0 ? (
+                                <div className="flex flex-col space-y-3">
+                                    {/* Total */}
+                                    <div className="flex justify-between text-base font-bold">
+                                        <span>Total:</span>
+                                        <span>{totalPriceFormatted} ETH</span>
+                                    </div>
 
-                                {/* Buy button */}
-                                <button
-                                    onClick={() => onBuy(nft.id, quantity, totalPriceValue)}
-                                    className="w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors"
+                                    {/* Buy button */}
+                                    <button
+                                        onClick={handleBuy}
+                                        className="w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors"
+                                        style={{
+                                            backgroundColor: colors.accent,
+                                            color: "#000000",
+                                        }}
+                                        disabled={quantity === 0}
+                                    >
+                                        Buy Now
+                                    </button>
+                                </div>
+                            ) : (
+                                <div
+                                    className="py-2 px-4 rounded-lg font-medium text-sm text-center"
                                     style={{
-                                        backgroundColor: colors.accent,
-                                        color: "#000000",
+                                        backgroundColor: colors.button,
+                                        color: colors.textSecondary,
                                     }}
-                                    disabled={quantity === 0}
                                 >
-                                    Buy Now
-                                </button>
-                            </div>
+                                    <span style={{ color: "#4ADE80" }}>Sold Out</span>
+                                </div>
+                            )
                         ) : (
-                            <div
-                                className="py-2 px-4 rounded-lg font-medium text-sm text-center"
-                                style={{
-                                    backgroundColor: colors.button,
-                                    color: colors.textSecondary,
-                                }}
-                            >
-                                <span style={{ color: "#4ADE80" }}>Sold Out</span>
-                            </div>
+                            // Sell section
+                            nft.isOwned && (
+                                <div className="flex flex-col space-y-3">
+                                    {/* Total */}
+                                    <div className="flex justify-between text-base font-bold">
+                                        <span>You will receive:</span>
+                                        <span>{totalSellFormatted} ETH</span>
+                                    </div>
+
+                                    {/* Sell button */}
+                                    <button
+                                        onClick={handleSell}
+                                        className="w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors"
+                                        style={{
+                                            backgroundColor: greenColor,
+                                            color: "#000000",
+                                        }}
+                                        disabled={sellQuantity === 0}
+                                    >
+                                        Sell Tokens
+                                    </button>
+                                </div>
+                            )
                         )}
                     </div>
                 </div>
