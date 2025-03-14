@@ -70,10 +70,12 @@ const initialNFTs = Array(20)
         }
     })
 
-// Helper function to randomly select owned NFTs
-const getRandomOwnedNFTs = (nfts) => {
+// Simple function to generate random owned NFTs
+const generateRandomOwnedNFTs = (nfts) => {
+    const ownedNFTsMap = {}
+
     // Randomly decide how many NFTs to own (between 2-5)
-    const ownedCount = Math.floor(Math.random() * 4) + 2 // 2 to 5
+    const ownedCount = Math.floor(Math.random() * 4) + 2
 
     // Create a copy of NFT IDs and shuffle them
     const shuffledIds = [...nfts.map((nft) => nft.id)]
@@ -82,19 +84,22 @@ const getRandomOwnedNFTs = (nfts) => {
         ;[shuffledIds[i], shuffledIds[j]] = [shuffledIds[j], shuffledIds[i]]
     }
 
-    // Take the first 'ownedCount' NFTs from the shuffled array
+    // Take the first few NFTs from the shuffled array
     const selectedIds = shuffledIds.slice(0, ownedCount)
 
-    // Create a map of owned NFTs with quantity owned for each
-    const ownedNFTsMap = {}
+    // Assign random owned quantities within available supply
     selectedIds.forEach((id) => {
-        // Randomly choose ownership quantity (10% to 50% of total supply)
         const nft = nfts.find((n) => n.id === id)
-        const maxOwnable = Math.floor(nft.totalSupply * 0.5) // Max 50% of total supply
-        const minOwnable = Math.floor(nft.totalSupply * 0.1) // Min 10% of total supply
-        const ownedQuantity = Math.floor(Math.random() * (maxOwnable - minOwnable + 1)) + minOwnable
-
-        ownedNFTsMap[id] = ownedQuantity
+        if (nft) {
+            // Make sure we own a reasonable quantity (5-20% of available supply)
+            const availableTokens = nft.totalSupply - nft.soldTokens
+            if (availableTokens > 0) {
+                const minQuantity = Math.max(1, Math.floor(availableTokens * 0.05))
+                const maxQuantity = Math.max(minQuantity, Math.floor(availableTokens * 0.2))
+                ownedNFTsMap[id] =
+                    Math.floor(Math.random() * (maxQuantity - minQuantity + 1)) + minQuantity
+            }
+        }
     })
 
     return ownedNFTsMap
@@ -103,18 +108,21 @@ const getRandomOwnedNFTs = (nfts) => {
 export function NFTProvider({ children }) {
     const [nfts, setNFTs] = useState(initialNFTs)
 
-    // Initialize owned NFTs from localStorage or generate random ones if not found
-    const [ownedNFTs, setOwnedNFTs] = useState(() => {
-        const savedOwnedNFTs = localStorage.getItem("ownedNFTs")
-        if (savedOwnedNFTs) {
-            return JSON.parse(savedOwnedNFTs)
-        }
-        return getRandomOwnedNFTs(initialNFTs)
-    })
+    // Initialize with random owned NFTs - simpler approach as requested
+    const [ownedNFTs, setOwnedNFTs] = useState(() => generateRandomOwnedNFTs(initialNFTs))
 
-    // Save owned NFTs to localStorage whenever they change
+    // Update NFTs to reflect random ownership
     useEffect(() => {
-        localStorage.setItem("ownedNFTs", JSON.stringify(ownedNFTs))
+        setNFTs((currentNFTs) =>
+            currentNFTs.map((nft) => {
+                const ownedAmount = ownedNFTs[nft.id] || 0
+                // Update soldTokens to include owned amount
+                return {
+                    ...nft,
+                    soldTokens: Math.max(nft.soldTokens, ownedAmount),
+                }
+            }),
+        )
     }, [ownedNFTs])
 
     // Add error handling for image loading
@@ -171,8 +179,25 @@ export function NFTProvider({ children }) {
         return false
     }
 
-    // Handle buying of NFTs
+    // Handle buying of NFTs with availability check
     const buyNFT = (id, quantity) => {
+        // Find the NFT to check available supply
+        const nft = nfts.find((nft) => nft.id === id)
+
+        if (!nft) {
+            console.error(`NFT with ID ${id} not found`)
+            return false
+        }
+
+        // Calculate available tokens
+        const availableTokens = nft.totalSupply - nft.soldTokens
+
+        // Check if requested quantity exceeds available supply
+        if (quantity > availableTokens) {
+            console.error(`Cannot buy ${quantity} tokens. Only ${availableTokens} available.`)
+            return false
+        }
+
         const newOwnedNFTs = { ...ownedNFTs }
 
         if (id in newOwnedNFTs) {
