@@ -1,5 +1,5 @@
 ![Alt Text](./image/PopSkully_Tag.jpg)
-![Alt Text](./image/screenshot.png)
+![Alt Text](./image/screenshot2.png)
 
 # Getting Started with Create React App
 
