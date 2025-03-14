@@ -32,20 +32,73 @@ const lightThemeColors = {
 export function ThemeProvider({ children }) {
     // Check if dark mode is stored in localStorage or use system preference as fallback
     const [isDarkMode, setIsDarkMode] = useState(() => {
+        // Check for saved preference in localStorage
         const savedTheme = localStorage.getItem("theme")
         if (savedTheme) {
             return savedTheme === "dark"
         }
-        // Use system preference as fallback
+        // If no preference is saved, use system preference
         return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
     })
 
-    // Update localStorage and apply body class when theme changes
+    // Apply the theme immediately on mount and whenever it changes
     useEffect(() => {
+        // Update localStorage
         localStorage.setItem("theme", isDarkMode ? "dark" : "light")
-        // Optional: Add/remove a class on the body for global styling
-        document.body.classList.toggle("dark-mode", isDarkMode)
+
+        // Apply dark class to html element (for Tailwind)
+        if (isDarkMode) {
+            document.documentElement.classList.add("dark")
+        } else {
+            document.documentElement.classList.remove("dark")
+        }
+
+        // Apply theme-specific CSS variables including scrollbar colors
+        document.documentElement.style.setProperty(
+            "--accent-color",
+            isDarkMode ? darkThemeColors.accent : lightThemeColors.accent,
+        )
+
+        // Apply Tailwind scrollbar CSS variables
+        document.documentElement.style.setProperty(
+            "--scrollbar-thumb",
+            isDarkMode ? darkThemeColors.accent : lightThemeColors.accent,
+        )
+
+        document.documentElement.style.setProperty(
+            "--scrollbar-track",
+            isDarkMode ? darkThemeColors.backgroundSecondary : lightThemeColors.backgroundSecondary,
+        )
     }, [isDarkMode])
+
+    // Listen for system preference changes
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+        const handleChange = (e) => {
+            // Only update if user hasn't set a preference
+            if (!localStorage.getItem("theme")) {
+                setIsDarkMode(e.matches)
+            }
+        }
+
+        // Add listener
+        if (mediaQuery.addEventListener) {
+            mediaQuery.addEventListener("change", handleChange)
+        } else {
+            // For older browsers
+            mediaQuery.addListener(handleChange)
+        }
+
+        // Cleanup listener
+        return () => {
+            if (mediaQuery.removeEventListener) {
+                mediaQuery.removeEventListener("change", handleChange)
+            } else {
+                // For older browsers
+                mediaQuery.removeListener(handleChange)
+            }
+        }
+    }, [])
 
     const toggleDarkMode = () => {
         setIsDarkMode((prev) => !prev)

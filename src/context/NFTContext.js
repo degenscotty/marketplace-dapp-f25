@@ -75,7 +75,7 @@ const generateRandomOwnedNFTs = (nfts) => {
     const ownedNFTsMap = {}
 
     // Randomly decide how many NFTs to own (between 2-5)
-    const ownedCount = Math.floor(Math.random() * 4) + 2
+    const ownedCount = /*Math.floor(Math.random() * 4)*/ 7
 
     // Create a copy of NFT IDs and shuffle them
     const shuffledIds = [...nfts.map((nft) => nft.id)]

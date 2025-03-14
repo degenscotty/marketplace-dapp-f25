@@ -130,7 +130,7 @@ function NFTGrid() {
     const ownedNFTIds = Object.keys(ownedNFTs).map((id) => parseInt(id))
 
     return (
-        <div className="w-full px-4 py-6 mt-12">
+        <div className="w-full px-4 mt-6 mb-6">
             {/* New section for My NFTs */}
             <h2 className="text-xl font-bold mb-4" style={{ color: colors.text }}>
                 My Projects

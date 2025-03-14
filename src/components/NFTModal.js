@@ -43,6 +43,20 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
     const sellQuantityPercentage =
         nft && nft.ownedQuantity ? (sellQuantity / nft.ownedQuantity) * 100 : 0
 
+    // Handle buy quantity input change
+    const handleBuyQuantityChange = (e) => {
+        const value = parseInt(e.target.value) || 0
+        // Limit to maximum available
+        setQuantity(Math.min(Math.max(0, value), maxAvailable))
+    }
+
+    // Handle sell quantity input change
+    const handleSellQuantityChange = (e) => {
+        const value = parseInt(e.target.value) || 0
+        // Limit to maximum owned
+        setSellQuantity(Math.min(Math.max(0, value), nft.ownedQuantity))
+    }
+
     // Handle buy action
     const handleBuy = () => {
         if (onBuy) {
@@ -64,6 +78,20 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* CSS to remove number input spinners */}
+            <style>
+                {`
+                .no-spinner::-webkit-inner-spin-button,
+                .no-spinner::-webkit-outer-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+                .no-spinner {
+                    -moz-appearance: textfield;
+                }
+                `}
+            </style>
+
             {/* Backdrop */}
             <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
 
@@ -173,97 +201,75 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                             )}
 
                             {activeTab === "buy" && (
-                                /* Progress bar with integrated quantity selector for buying */
+                                /* Progress bar with text input for buying */
                                 <div className="mt-2 mb-5">
                                     <div className="mb-2 text-sm font-medium">
                                         Quantity to purchase
                                     </div>
-                                    <div className="relative">
+
+                                    {/* Progress bar */}
+                                    <div className="relative mb-3">
                                         <div
                                             className="w-full h-1.5 rounded-full"
                                             style={{ backgroundColor: colors.border }}
                                         >
-                                            {/* Sold tokens and quantity selector combined */}
-                                            <div className="relative h-1.5">
-                                                {/* Sold tokens */}
+                                            {/* Sold tokens */}
+                                            <div
+                                                className="absolute left-0 h-1.5 rounded-l-full"
+                                                style={{
+                                                    backgroundColor:
+                                                        maxAvailable <= 0
+                                                            ? colors.green
+                                                            : colors.accent,
+                                                    borderRadius:
+                                                        maxAvailable <= 0
+                                                            ? "9999px"
+                                                            : "9999px 0 0 9999px",
+                                                    width:
+                                                        maxAvailable > 0
+                                                            ? `${soldPercentage}%`
+                                                            : "100%",
+                                                }}
+                                            ></div>
+                                            {/* Selected quantity */}
+                                            {maxAvailable > 0 && (
                                                 <div
-                                                    className="absolute left-0 h-1.5 rounded-l-full"
+                                                    className="absolute h-1.5"
                                                     style={{
-                                                        backgroundColor:
-                                                            maxAvailable <= 0
-                                                                ? colors.green
-                                                                : colors.accent,
+                                                        backgroundColor: colors.green,
+                                                        left: `${soldPercentage}%`,
+                                                        width: `${quantityPercentage}%`,
                                                         borderRadius:
-                                                            maxAvailable <= 0
-                                                                ? "9999px"
-                                                                : "9999px 0 0 9999px",
-                                                        width:
-                                                            maxAvailable > 0
-                                                                ? `${soldPercentage}%`
-                                                                : "100%",
+                                                            quantity + nft.soldTokens >=
+                                                            nft.totalSupply
+                                                                ? "0 9999px 9999px 0"
+                                                                : "0",
                                                     }}
                                                 ></div>
-                                                {/* Selected quantity */}
-                                                {maxAvailable > 0 && (
-                                                    <div
-                                                        className="absolute h-1.5"
-                                                        style={{
-                                                            backgroundColor: colors.green,
-                                                            left: `${soldPercentage}%`,
-                                                            width: `${quantityPercentage}%`,
-                                                            borderRadius:
-                                                                quantity + nft.soldTokens >=
-                                                                nft.totalSupply
-                                                                    ? "0 9999px 9999px 0"
-                                                                    : "0",
-                                                        }}
-                                                    ></div>
-                                                )}
-                                            </div>
+                                            )}
                                         </div>
-                                        {/* Range input with custom styling - only over available section */}
-                                        {maxAvailable > 0 && (
-                                            <div
-                                                className="absolute top-0 left-0 w-full h-1.5"
-                                                style={{ pointerEvents: "none" }}
-                                            >
-                                                <input
-                                                    type="range"
-                                                    min="1"
-                                                    max={maxAvailable}
-                                                    value={quantity}
-                                                    onChange={(e) =>
-                                                        setQuantity(parseInt(e.target.value))
-                                                    }
-                                                    className="absolute top-1/2 -translate-y-1/2 h-3 cursor-pointer appearance-none bg-transparent 
-                                                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
-                                                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md 
-                                                    [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-green-400
-                                                    [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-3 
-                                                    [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white 
-                                                    [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-green-400"
-                                                    style={{
-                                                        left: `${soldPercentage - 1}%`,
-                                                        width: `${availablePercentage + 2}%`,
-                                                        pointerEvents: "auto",
-                                                        zIndex: 10, // Ensure slider is above progress bar
-                                                        marginLeft: "0px", // Reset any margin that might affect position
-                                                    }}
-                                                    aria-label="Select quantity of tokens to purchase"
-                                                />
-                                            </div>
-                                        )}
                                     </div>
+
                                     {maxAvailable > 0 && (
-                                        <div className="text-center mt-2">
-                                            <span
-                                                className="px-2 py-1 rounded text-xs font-medium"
+                                        <div className="flex items-center justify-center space-x-2">
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                max={maxAvailable}
+                                                value={quantity}
+                                                onChange={handleBuyQuantityChange}
+                                                className="w-20 px-2 py-1 rounded text-center text-sm no-spinner"
                                                 style={{
-                                                    backgroundColor: `${colors.green}33`,
-                                                    color: colors.green,
+                                                    backgroundColor: colors.background,
+                                                    color: colors.text,
+                                                    border: `1px solid ${colors.border}`,
                                                 }}
+                                            />
+                                            <span
+                                                className="text-sm"
+                                                style={{ color: colors.textSecondary }}
                                             >
-                                                {quantity} {quantity === 1 ? "token" : "tokens"}
+                                                of {maxAvailable} available
                                             </span>
                                         </div>
                                     )}
@@ -271,10 +277,12 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                             )}
 
                             {activeTab === "sell" && nft.isOwned && (
-                                /* Sell quantity selector */
+                                /* Sell quantity input with progress bar */
                                 <div className="mt-2 mb-5">
                                     <div className="mb-2 text-sm font-medium">Quantity to sell</div>
-                                    <div className="relative">
+
+                                    {/* Progress bar */}
+                                    <div className="relative mb-3">
                                         <div
                                             className="w-full h-1.5 rounded-full"
                                             style={{ backgroundColor: colors.border }}
@@ -283,7 +291,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                             <div
                                                 className="absolute left-0 h-1.5 rounded-full"
                                                 style={{
-                                                    backgroundColor: colors.green,
+                                                    backgroundColor: colors.red,
                                                     width: `${sellQuantityPercentage}%`,
                                                     minWidth: sellQuantity > 0 ? "4px" : "0px",
                                                     borderRadius:
@@ -295,54 +303,27 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                                 }}
                                             ></div>
                                         </div>
-
-                                        {/* Range input for sell quantity */}
-                                        <div
-                                            className="absolute top-0 left-0 w-full h-1.5"
-                                            style={{ pointerEvents: "none" }}
-                                        >
-                                            <input
-                                                type="range"
-                                                min="0"
-                                                max="100"
-                                                value={sellQuantityPercentage}
-                                                onChange={(e) => {
-                                                    const percentage = parseInt(e.target.value)
-                                                    const newQuantity = Math.max(
-                                                        1,
-                                                        Math.round(
-                                                            (percentage / 100) * nft.ownedQuantity,
-                                                        ),
-                                                    )
-                                                    setSellQuantity(newQuantity)
-                                                }}
-                                                className="absolute top-1/2 -translate-y-1/2 h-3 cursor-pointer appearance-none bg-transparent 
-                                                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
-                                                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md 
-                                                    [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-green-400
-                                                    [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-3 
-                                                    [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white 
-                                                    [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-green-400"
-                                                style={{
-                                                    width: "100%",
-                                                    pointerEvents: "auto",
-                                                    left: "0",
-                                                    marginLeft: "0px",
-                                                    zIndex: 10,
-                                                }}
-                                                aria-label="Select quantity of tokens to sell"
-                                            />
-                                        </div>
                                     </div>
-                                    <div className="text-center mt-2">
-                                        <span
-                                            className="px-2 py-1 rounded text-xs font-medium"
+
+                                    <div className="flex items-center justify-center space-x-2">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max={nft.ownedQuantity}
+                                            value={sellQuantity}
+                                            onChange={handleSellQuantityChange}
+                                            className="w-20 px-2 py-1 rounded text-center text-sm no-spinner"
                                             style={{
-                                                backgroundColor: `${colors.green}20`,
-                                                color: colors.green,
+                                                backgroundColor: colors.background,
+                                                color: colors.text,
+                                                border: `1px solid ${colors.border}`,
                                             }}
+                                        />
+                                        <span
+                                            className="text-sm"
+                                            style={{ color: colors.textSecondary }}
                                         >
-                                            {sellQuantity} {sellQuantity === 1 ? "token" : "tokens"}
+                                            of {nft.ownedQuantity} owned
                                         </span>
                                     </div>
                                 </div>

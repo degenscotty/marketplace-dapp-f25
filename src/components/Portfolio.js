@@ -74,7 +74,7 @@ function Portfolio() {
     const greenColor = "#10B981"
 
     return (
-        <div className="container mx-auto px-4 pt-24 pb-8 max-w-7xl">
+        <div className="container mx-auto px-4 mt-6 pb-8 max-w-7xl">
             <h1 className="text-xl font-bold mb-4" style={{ color: colors.text }}>
                 My Portfolio
             </h1>
@@ -97,7 +97,7 @@ function Portfolio() {
                             </h2>
 
                             {/* Summary Stats */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                                 <div
                                     className="p-3 rounded-lg"
                                     style={{ backgroundColor: colors.background }}
@@ -113,6 +113,23 @@ function Portfolio() {
                                         style={{ color: colors.text }}
                                     >
                                         {totalPortfolioValue.toFixed(3)} ETH
+                                    </p>
+                                </div>
+                                <div
+                                    className="p-3 rounded-lg"
+                                    style={{ backgroundColor: colors.background }}
+                                >
+                                    <p
+                                        className="text-xs mb-1"
+                                        style={{ color: colors.textSecondary }}
+                                    >
+                                        USD Value
+                                    </p>
+                                    <p
+                                        className="text-base font-bold"
+                                        style={{ color: colors.text }}
+                                    >
+                                        ${(totalPortfolioValue * 3500).toLocaleString()}
                                     </p>
                                 </div>
                                 <div
@@ -217,7 +234,11 @@ function Portfolio() {
                             {/* Investment Performance Metrics */}
                             <div
                                 className="p-3 rounded-lg"
-                                style={{ backgroundColor: colors.background }}
+                                style={{
+                                    backgroundColor: colors.background,
+                                    height: "176px",
+                                    marginTop: "24px",
+                                }}
                             >
                                 <h3
                                     className="text-xs font-semibold mb-2"
@@ -348,16 +369,16 @@ function Portfolio() {
                                 Asset Distribution
                             </h2>
 
-                            {/* Asset Distribution Chart */}
-                            <div className="h-64">
+                            {/* Asset Distribution Chart - increasing height */}
+                            <div className="h-72">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
                                             data={assetDistributionData}
                                             cx="50%"
                                             cy="50%"
-                                            innerRadius={60}
-                                            outerRadius={90}
+                                            innerRadius={70}
+                                            outerRadius={100}
                                             paddingAngle={3}
                                             dataKey="value"
                                             nameKey="name"
@@ -374,10 +395,10 @@ function Portfolio() {
                                 </ResponsiveContainer>
                             </div>
 
-                            {/* Asset List */}
+                            {/* Asset List - adjusted to match height of investment performance section */}
                             <div
-                                className="mt-3 p-3 rounded-lg overflow-auto max-h-48"
-                                style={{ backgroundColor: colors.background }}
+                                className="mt-3 p-3 rounded-lg overflow-auto"
+                                style={{ backgroundColor: colors.background, height: "176px" }}
                             >
                                 <h3
                                     className="text-xs font-semibold mb-2"
@@ -386,37 +407,39 @@ function Portfolio() {
                                     Holdings Breakdown
                                 </h3>
                                 <div className="space-y-1">
-                                    {assetDistributionData.map((asset, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center justify-between py-1 border-b text-xs"
-                                            style={{ borderColor: colors.border }}
-                                        >
-                                            <div className="flex items-center">
-                                                <div
-                                                    className="w-2 h-2 rounded-full mr-2"
-                                                    style={{
-                                                        backgroundColor:
-                                                            COLORS[index % COLORS.length],
-                                                    }}
-                                                ></div>
-                                                <span style={{ color: colors.text }}>
-                                                    {asset.name}
-                                                </span>
+                                    {assetDistributionData
+                                        .sort((a, b) => b.value - a.value)
+                                        .map((asset, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center justify-between py-1 border-b text-xs"
+                                                style={{ borderColor: colors.border }}
+                                            >
+                                                <div className="flex items-center">
+                                                    <div
+                                                        className="w-2 h-2 rounded-full mr-2"
+                                                        style={{
+                                                            backgroundColor:
+                                                                COLORS[index % COLORS.length],
+                                                        }}
+                                                    ></div>
+                                                    <span style={{ color: colors.text }}>
+                                                        {asset.name}
+                                                    </span>
+                                                </div>
+                                                <div className="flex space-x-3">
+                                                    <span style={{ color: colors.textSecondary }}>
+                                                        {asset.value.toFixed(3)} ETH
+                                                    </span>
+                                                    <span
+                                                        className="font-medium"
+                                                        style={{ color: colors.text }}
+                                                    >
+                                                        {asset.percentage}%
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div className="flex space-x-3">
-                                                <span style={{ color: colors.textSecondary }}>
-                                                    {asset.value.toFixed(3)} ETH
-                                                </span>
-                                                <span
-                                                    className="font-medium"
-                                                    style={{ color: colors.text }}
-                                                >
-                                                    {asset.percentage}%
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
                                 </div>
                             </div>
                         </div>
