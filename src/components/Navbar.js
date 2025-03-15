@@ -31,6 +31,15 @@ function Navbar() {
                                 Tokenization Demo
                             </Link>
                             <Link
+                                to="/projects"
+                                style={{
+                                    color: colors.accent,
+                                }}
+                                className="text-sm font-medium px-3 py-2 rounded-md transition-colors hover:opacity-80"
+                            >
+                                Projects
+                            </Link>
+                            <Link
                                 to="/portfolio"
                                 style={{
                                     color: colors.accent,

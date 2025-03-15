@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import Navbar from "./components/Navbar"
 import NFTGrid from "./components/NFTGrid"
 import Portfolio from "./components/Portfolio"
+import LandingPage from "./components/LandingPage"
 import { useTheme } from "./context/ThemeContext"
 import { NFTProvider } from "./context/NFTContext"
 
@@ -35,7 +36,8 @@ function App() {
                     {/* Content with dynamic scrollbar styling */}
                     <div className="flex-1 overflow-y-auto themed-scrollbar">
                         <Routes>
-                            <Route path="/" element={<NFTGrid />} />
+                            <Route path="/" element={<LandingPage />} />
+                            <Route path="/projects" element={<NFTGrid />} />
                             <Route path="/portfolio" element={<Portfolio />} />
                         </Routes>
                     </div>
