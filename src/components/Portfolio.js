@@ -394,7 +394,7 @@ function Portfolio() {
 
                             {/* Asset List - adjusted to match height of investment performance section */}
                             <div
-                                className="mt-3 p-3 rounded-lg overflow-auto"
+                                className="mt-3 p-3 rounded-lg overflow-auto themed-scrollbar"
                                 style={{ backgroundColor: colors.background, height: "176px" }}
                             >
                                 <h3

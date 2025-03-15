@@ -93,7 +93,11 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
             </style>
 
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
+            <div
+                className="absolute inset-0 bg-black bg-opacity-50"
+                style={{ backdropFilter: "blur(2px)", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+                onClick={onClose}
+            ></div>
 
             {/* Modal content */}
             <div
