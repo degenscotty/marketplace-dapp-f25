@@ -2,31 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* RainbowKit custom styles to better match the ThemeContext */
-:root {
-    --rk-fonts-body:
-        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    --rk-radii-actionButton: 8px;
-    --rk-radii-connectButton: 8px;
-    --rk-radii-menuButton: 8px;
-    --rk-radii-modal: 12px;
-    --rk-radii-modalMobile: 12px;
-
-    /* Theme color variables for scrollbars */
-    --themed-scrollbar-track: #f1f1f1;
-    --themed-scrollbar-thumb: #888;
-
-    /* Theme variables for background pattern */
-    --pattern-color-1: rgba(0, 0, 0, 0.05);
-    --pattern-color-2: rgba(0, 0, 0, 0.02);
-}
-
 /* Dark mode pattern colors */
 .dark {
-    --pattern-color-1: rgba(255, 255, 255, 0.05);
-    --pattern-color-2: rgba(255, 255, 255, 0.02);
-
     /* Apply background pattern only in dark mode */
     .bg-pattern::before {
         content: "";
@@ -38,7 +15,7 @@
         background-image: url("/image/pattern-sml-7@2x.webp");
         background-repeat: repeat;
         background-size: 120px 120px;
-        opacity: 0.6;
+        opacity: 1;
         pointer-events: none;
         z-index: 0;
     }
@@ -49,42 +26,21 @@
     position: relative;
 }
 
+.bg-pattern::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1)); /* Adjust colors and opacity as needed */
+    pointer-events: none; /* Allow clicks to pass through */
+    z-index: 1; /* Ensure it sits above the pattern */
+}
+
 .bg-pattern > * {
     position: relative;
-    z-index: 1;
-}
-
-/* Target RainbowKit elements specifically */
-[data-rk] button {
-    font-family: var(--rk-fonts-body);
-    transition: all 0.2s ease-in-out;
-}
-
-/* Force AccountModal elements to have correct styling */
-[data-rk] .rk-account-modal * {
-    transition: all 0.2s ease-in-out;
-}
-
-/* Ensure menu items have proper styling */
-[data-rk] .rk-menu-item {
-    border-radius: var(--rk-radii-menuButton);
-    transition: all 0.2s ease-in-out;
-}
-
-/* Profile dropdown menu */
-[data-rk] .rk-account-button {
-    transition: all 0.2s ease-in-out;
-}
-
-/* Fix any remaining wallet connection UI issues */
-[data-rk] .rk-wallet-option {
-    border-radius: var(--rk-radii-menuButton);
-    transition: all 0.2s ease-in-out;
-}
-
-/* Modal backdrop should have blur */
-[data-rk] .rk-modal-backdrop {
-    backdrop-filter: blur(4px);
+    z-index: 2;
 }
 
 /* Basic scrollbar utilities */

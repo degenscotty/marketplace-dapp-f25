@@ -7,7 +7,7 @@ import { useTheme } from "./context/ThemeContext"
 import { NFTProvider } from "./context/NFTContext"
 
 function App() {
-    const { colors, isDarkMode } = useTheme()
+    const { colors } = useTheme()
 
     // Update CSS variables for theme colors
     React.useEffect(() => {

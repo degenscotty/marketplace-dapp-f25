@@ -26,11 +26,6 @@ function Navbar() {
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
 
-    // Determine the background color based on theme and scroll position
-    const navbarBackgroundColor = scrolled
-        ? `${colors.backgroundSecondary}${Math.floor(scrollProgress * 40 + 216).toString(16)}`
-        : `${colors.backgroundSecondary}00`
-
     return (
         <>
             {/* Add a spacer to prevent content from appearing under the navbar */}
@@ -38,11 +33,8 @@ function Navbar() {
             <div className="fixed top-0 left-0 right-0 z-[9999]">
                 {/* Main navbar */}
                 <nav
-                    className={`h-14 flex justify-center items-center text-base w-full transition-all duration-500 ${
-                        scrolled ? "backdrop-blur-md" : "backdrop-blur-none"
-                    }`}
+                    className={`h-14 flex justify-center items-center text-base w-full transition-all duration-500`}
                     style={{
-                        backgroundColor: navbarBackgroundColor,
                         color: colors.text,
                         pointerEvents: "auto", // Ensure clicks are registered
                     }}
@@ -75,8 +67,8 @@ function Navbar() {
                             </div>
                             <div className="scale-95 transform origin-right">
                                 <ConnectButton
-                                    showBalance={false}
-                                    chainStatus="icon"
+                                    showBalance={true}
+                                    chainStatus="full"
                                     accountStatus={{
                                         smallScreen: "avatar",
                                         largeScreen: "full",
@@ -90,29 +82,6 @@ function Navbar() {
                         </div>
                     </div>
                 </nav>
-
-                {/* Improved fade-out gradient that works for both light and dark modes */}
-                {scrolled && (
-                    <div
-                        className="h-8 w-full transition-opacity duration-300"
-                        style={{
-                            background: isDarkMode
-                                ? `linear-gradient(to bottom, 
-                                    ${colors.backgroundSecondary} 0%, 
-                                    ${colors.backgroundSecondary}CC 40%, 
-                                    ${colors.backgroundSecondary}66 70%, 
-                                    transparent 100%)`
-                                : `linear-gradient(to bottom, 
-                                    white 0%, 
-                                    rgba(255, 255, 255, 0.8) 40%, 
-                                    rgba(255, 255, 255, 0.4) 70%, 
-                                    transparent 100%)`,
-                            opacity: scrollProgress,
-                            pointerEvents: "none", // Allow clicks to pass through
-                            marginTop: "-4px", // Overlap with the navbar for a smoother transition
-                        }}
-                    />
-                )}
             </div>
         </>
     )

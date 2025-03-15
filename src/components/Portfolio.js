@@ -2,8 +2,6 @@ import React from "react"
 import { useNFTs } from "../context/NFTContext"
 import { useTheme } from "../context/ThemeContext"
 import {
-    LineChart,
-    Line,
     XAxis,
     YAxis,
     CartesianGrid,
@@ -14,7 +12,6 @@ import {
     PieChart,
     Pie,
     Cell,
-    Legend,
 } from "recharts"
 
 function Portfolio() {
