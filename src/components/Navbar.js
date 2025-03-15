@@ -7,30 +7,12 @@ import { ConnectButton } from "@rainbow-me/rainbowkit"
 function Navbar() {
     const { isDarkMode, toggleDarkMode, colors } = useTheme()
     const { nfts } = useNFTs()
-    const [scrolled, setScrolled] = useState(false)
-    const [scrollProgress, setScrollProgress] = useState(0)
-
-    // Add scroll listener to detect when user scrolls
-    useEffect(() => {
-        const handleScroll = () => {
-            // Update scrolled state
-            setScrolled(window.scrollY > 20)
-
-            // Calculate scroll progress for smoother transitions
-            // This gives us a value between 0 and 1 for the first 100px of scrolling
-            const progress = Math.min(1, window.scrollY / 100)
-            setScrollProgress(progress)
-        }
-
-        window.addEventListener("scroll", handleScroll)
-        return () => window.removeEventListener("scroll", handleScroll)
-    }, [])
 
     return (
         <>
             {/* Add a spacer to prevent content from appearing under the navbar */}
             <div className="h-14"></div>
-            <div className="fixed top-0 left-0 right-0 z-[9999]">
+            <div className="fixed top-0 left-0 right-0 z-1">
                 {/* Main navbar */}
                 <nav
                     className={`h-14 flex justify-center items-center text-base w-full transition-all duration-500`}
