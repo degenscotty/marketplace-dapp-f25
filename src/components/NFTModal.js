@@ -177,10 +177,10 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                         className={`py-2 px-4 font-medium text-sm ${activeTab === "sell" ? "border-b-2" : ""}`}
                                         style={{
                                             borderColor:
-                                                activeTab === "sell" ? colors.green : "transparent",
+                                                activeTab === "sell" ? colors.red : "transparent",
                                             color:
                                                 activeTab === "sell"
-                                                    ? colors.green
+                                                    ? colors.red
                                                     : colors.textSecondary,
                                         }}
                                         onClick={() => setActiveTab("sell")}
@@ -436,7 +436,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                     <span
                                         className="inline-block px-1.5 py-0.5 rounded mr-1"
                                         style={{
-                                            backgroundColor: colors.button,
+                                            backgroundColor: colors.border,
                                             color: colors.textSecondary,
                                         }}
                                     >
@@ -445,7 +445,7 @@ function NFTModal({ nft, isOpen, onClose, onBuy }) {
                                     <span
                                         className="inline-block px-1.5 py-0.5 rounded"
                                         style={{
-                                            backgroundColor: colors.button,
+                                            backgroundColor: colors.border,
                                             color: colors.textSecondary,
                                         }}
                                     >

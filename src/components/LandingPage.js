@@ -1,11 +1,13 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useTheme } from "../context/ThemeContext"
 import { useNFTs } from "../context/NFTContext"
-import bannerImage from "../image/banner1.png"
+import { DotLottieReact } from "@lottiefiles/dotlottie-react"
+import animationDataLight from "../image/animationDataLight.json"
+import animationDataDark from "../image/animationDataDark.json"
 
 function LandingPage() {
-    const { colors } = useTheme()
+    const { colors, isDarkMode } = useTheme()
     const { nfts, isNFTOwned, ownedNFTs, handleImageError } = useNFTs()
 
     // Get the first 4 NFTs for featured properties
@@ -20,7 +22,16 @@ function LandingPage() {
     return (
         <div className="flex flex-col items-center">
             {/* Hero Section */}
-            <div className="w-full py-20 px-4 flex flex-col items-center text-center">
+            <div className="w-full px-4 flex flex-col items-center text-center">
+                {/* Lottie Animation */}
+                <div style={{ width: "600px", height: "600px" }} className="w-full">
+                    <DotLottieReact
+                        data={isDarkMode ? animationDataDark : animationDataLight}
+                        loop
+                        autoplay
+                    />
+                </div>
+
                 <h1 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: colors.text }}>
                     Real Estate Tokenization Platform
                 </h1>
@@ -34,14 +45,17 @@ function LandingPage() {
                 <div className="flex flex-wrap justify-center gap-4">
                     <Link
                         to="/projects"
-                        className="px-8 py-3 rounded-full text-white font-medium text-lg transition-transform hover:scale-105"
-                        style={{ backgroundColor: colors.accent }}
+                        className="px-8 py-3 rounded-lg font-medium text-lg transition-transform hover:scale-105"
+                        style={{
+                            backgroundColor: colors.accent,
+                            color: colors.backgroundSecondary,
+                        }}
                     >
                         Browse Projects
                     </Link>
                     <Link
                         to="/portfolio"
-                        className="px-8 py-3 rounded-full font-medium text-lg border-2 transition-transform hover:scale-105"
+                        className="px-8 py-3 rounded-lg font-medium text-lg border-2 transition-transform hover:scale-105"
                         style={{
                             borderColor: colors.accent,
                             color: colors.accent,
@@ -203,8 +217,11 @@ function LandingPage() {
                     <div className="text-center mt-12">
                         <Link
                             to="/projects"
-                            className="px-8 py-3 rounded-full text-white font-medium text-lg transition-transform hover:scale-105 inline-block"
-                            style={{ backgroundColor: colors.accent }}
+                            className="px-8 py-3 rounded-lg font-medium text-lg transition-transform hover:scale-105 inline-block"
+                            style={{
+                                backgroundColor: colors.accent,
+                                color: colors.backgroundSecondary,
+                            }}
                         >
                             View All Projects
                         </Link>
@@ -227,8 +244,11 @@ function LandingPage() {
                     </p>
                     <Link
                         to="/projects"
-                        className="px-8 py-3 rounded-full text-white font-medium text-lg transition-transform hover:scale-105 inline-block"
-                        style={{ backgroundColor: colors.accent }}
+                        className="px-8 py-3 rounded-lg font-medium text-lg transition-transform hover:scale-105 inline-block"
+                        style={{
+                            backgroundColor: colors.accent,
+                            color: colors.backgroundSecondary,
+                        }}
                     >
                         Get Started Now
                     </Link>

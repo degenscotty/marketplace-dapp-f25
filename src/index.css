@@ -2,9 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark mode pattern colors */
-.dark {
-    /* Apply background pattern only in dark mode */
+.light {
     .bg-pattern::before {
         content: "";
         position: absolute;
@@ -12,10 +10,27 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: url("/image/pattern-sml-7@2x.webp");
+        background-image: url("/image/light_pattern.png");
+        background-repeat: repeat;
+        background-size: 240px 240px;
+        opacity: 0.5;
+        pointer-events: none;
+        z-index: 0;
+    }
+}
+
+.dark {
+    .bg-pattern::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("/image/dark_pattern.webp");
         background-repeat: repeat;
         background-size: 120px 120px;
-        opacity: 1;
+        opacity: 0.5;
         pointer-events: none;
         z-index: 0;
     }
@@ -26,20 +41,40 @@
     position: relative;
 }
 
-.bg-pattern::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, 0.15)
-    ); /* Adjust colors and opacity as needed */
-    pointer-events: none; /* Allow clicks to pass through */
-    z-index: 1; /* Ensure it sits above the pattern */
+.dark {
+    .bg-pattern::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0.15)
+        ); /* Adjust colors and opacity as needed */
+        pointer-events: none; /* Allow clicks to pass through */
+        z-index: 1; /* Ensure it sits above the pattern */
+    }
+}
+
+.light {
+    .bg-pattern::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0.15)
+        ); /* Adjust colors and opacity as needed */
+        pointer-events: none; /* Allow clicks to pass through */
+        z-index: 1; /* Ensure it sits above the pattern */
+    }
 }
 
 .bg-pattern > * {

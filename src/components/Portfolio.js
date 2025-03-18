@@ -338,7 +338,7 @@ function Portfolio() {
                                     <span
                                         className="inline-block px-1.5 py-0.5 rounded mr-1"
                                         style={{
-                                            backgroundColor: colors.button,
+                                            backgroundColor: colors.border,
                                             color: colors.textSecondary,
                                         }}
                                     >
@@ -347,7 +347,7 @@ function Portfolio() {
                                     <span
                                         className="inline-block px-1.5 py-0.5 rounded"
                                         style={{
-                                            backgroundColor: colors.button,
+                                            backgroundColor: colors.border,
                                             color: colors.textSecondary,
                                         }}
                                     >
